@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Manager Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<style>
+
+/* ─── THEME ─── */
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --border: #e2ddd6;
+  --ink: #1a1714;
+  --muted: #6f6a64;
+  --accent: #1a6b5a;
+  --red: #c0392b;
+}
+
+/* RESET */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ─── TOPBAR ─── */
+#topbar {
+  height: 60px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 32px;
+}
+
+.logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+}
+
+.logout-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ─── LAYOUT ─── */
+.layout {
+  display: flex;
+}
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  width: 220px;
+  border-right: 1px solid var(--border);
+  padding: 20px;
+}
+
+.nav-item {
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+.nav-item.active {
+  background: rgba(26,107,90,0.1);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── CONTENT ─── */
+#content {
+  flex: 1;
+  padding: 32px;
+}
+
+.page {
+  display: none;
+}
+
+.page.active {
+  display: block;
+}
+
+/* ─── TABLE ─── */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+td {
+  padding: 14px;
+}
+
+tr {
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+
+tr:hover {
+  background: #faf9f7;
+}
+
+/* ─── STATUS ─── */
+.status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status.scheduled {
+  background: #eaf3f0;
+  color: var(--accent);
+}
+
+/* ─── ACTION BUTTONS ─── */
+.action-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn.approve {
+  background: #eaf3f0;
+  color: var(--accent);
+}
+
+.btn.reject {
+  background: #fdf0ef;
+  color: var(--red);
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+/* ─── MODAL ─── */
+#modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modal {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 400px;
+}
+
+.close-btn {
+  float: right;
+  cursor: pointer;
+}
+
+/* ─── EMPTY ─── */
+.empty {
+  text-align: center;
+  margin-top: 100px;
+  color: var(--muted);
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+
+<div id="topbar">
+  <div class="logo">Manager Dashboard</div>
+  <div class="logout-btn">Logout</div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+
+  <div id="sidebar">
+    <div class="nav-item active" onclick="showPage('meetings', this)">📅 Meetings</div>
+    <div class="nav-item" onclick="showPage('team', this)">👥 Team</div>
+  </div>
+
+  <!-- CONTENT -->
+
+  <div id="content">
+
+```
+<!-- MEETINGS -->
+<div id="meetings" class="page active">
+  <h2>Scheduled Meetings</h2>
+  <br/>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr onclick="openModal('John Doe','12 Apr','10:00 AM')">
+          <td>John Doe</td>
+          <td>12 Apr</td>
+          <td>10:00 AM</td>
+          <td><span class="status scheduled">Scheduled</span></td>
+          <td class="action-cell">
+            <button class="btn approve" onclick="approveMeeting(event, this)">✔</button>
+            <button class="btn reject" onclick="rejectMeeting(event, this)">✖</button>
+          </td>
+        </tr>
+
+        <tr onclick="openModal('Jane Smith','13 Apr','2:00 PM')">
+          <td>Jane Smith</td>
+          <td>13 Apr</td>
+          <td>2:00 PM</td>
+          <td><span class="status scheduled">Scheduled</span></td>
+          <td class="action-cell">
+            <button class="btn approve" onclick="approveMeeting(event, this)">✔</button>
+            <button class="btn reject" onclick="rejectMeeting(event, this)">✖</button>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TEAM -->
+<div id="team" class="page">
+  <div class="empty">
+    <h2>Team details coming soon</h2>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- MODAL -->
+
+<div id="modal-bg">
+  <div id="modal">
+    <span class="close-btn" onclick="closeModal()">✖</span>
+    <h3 id="m-name"></h3>
+    <p id="m-date"></p>
+    <p id="m-time"></p>
+  </div>
+</div>
+
+<script>
+
+/* PAGE SWITCH */
+function showPage(page, el) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
+
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  el.classList.add("active");
+}
+
+/* MODAL */
+function openModal(name, date, time) {
+  document.getElementById("m-name").innerText = name;
+  document.getElementById("m-date").innerText = "Date: " + date;
+  document.getElementById("m-time").innerText = "Time: " + time;
+
+  document.getElementById("modal-bg").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("modal-bg").style.display = "none";
+}
+
+/* APPROVE */
+function approveMeeting(event, btn) {
+  event.stopPropagation();
+
+  const row = btn.closest("tr");
+  const status = row.querySelector(".status");
+
+  status.innerText = "Approved";
+  status.style.background = "#eaf3f0";
+
+  btn.parentElement.innerHTML = "✔ Done";
+}
+
+/* REJECT */
+function rejectMeeting(event, btn) {
+  event.stopPropagation();
+
+  const row = btn.closest("tr");
+  const status = row.querySelector(".status");
+
+  status.innerText = "Rejected";
+  status.style.background = "#fdf0ef";
+
+  btn.parentElement.innerHTML = "✖ Rejected";
+}
+
+</script>
+
+</body>
+</html>

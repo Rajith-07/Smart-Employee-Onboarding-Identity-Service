@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Join Our Team — Employee Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink: #0f0e0d;
+    --ink-2: #3a3835;
+    --ink-3: #7a776f;
+    --paper: #faf9f7;
+    --paper-2: #f0ede7;
+    --paper-3: #e5e0d8;
+    --accent: #c8410a;
+    --accent-2: #e8581f;
+    --accent-light: #fdf0ea;
+    --success: #2a7a4b;
+    --success-bg: #edf7f1;
+    --error: #b91c1c;
+    --radius: 6px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(15,14,13,0.08), 0 4px 16px rgba(15,14,13,0.04);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: var(--ink);
+    padding: 0 48px;
+    height: 58px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .brand {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #faf9f7;
+    letter-spacing: -0.3px;
+  }
+  .brand span { color: #e8581f; }
+  .header-tag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.08);
+    padding: 4px 12px; border-radius: 100px;
+  }
+
+  /* ── Page layout ── */
+  .page { max-width: 860px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  .intro { margin-bottom: 48px; }
+  .intro .eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px;
+  }
+  .intro h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 40px; line-height: 1.15; letter-spacing: -0.5px;
+    color: var(--ink); margin-bottom: 12px;
+  }
+  .intro p { font-size: 15px; color: var(--ink-3); max-width: 500px; }
+  .notice {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px;
+    background: var(--accent-light);
+    border: 1px solid #f5cbb0;
+    border-radius: var(--radius);
+    padding: 8px 14px;
+    font-size: 12px; color: var(--accent); font-weight: 500;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--paper-3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .sec-head {
+    padding: 28px 36px 22px;
+    border-bottom: 1px solid var(--paper-2);
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .sec-icon {
+    width: 36px; height: 36px; border-radius: var(--radius);
+    background: var(--accent-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; flex-shrink: 0; margin-top: 2px;
+  }
+  .sec-title { font-family: 'DM Serif Display', serif; font-size: 20px; letter-spacing: -0.3px; }
+  .sec-desc  { font-size: 13px; color: var(--ink-3); margin-top: 2px; }
+
+  .sec-body { padding: 32px 36px; }
+
+  /* ── Grid ── */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; }
+  .grid .full { grid-column: 1 / -1; }
+
+  /* ── Fields ── */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .field label .req { color: var(--accent); }
+  .field input, .field select {
+    height: 42px; padding: 0 14px;
+    border: 1px solid var(--paper-3); border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink);
+    background: var(--paper); outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    -webkit-appearance: none; appearance: none;
+  }
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a776f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center;
+    padding-right: 36px; cursor: pointer;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--ink-2);
+    box-shadow: 0 0 0 3px rgba(15,14,13,0.07);
+    background: #fff;
+  }
+  .field input.valid  { border-color: var(--success); }
+  .field input.invalid{ border-color: var(--error); }
+  .hint  { font-size: 11px; color: var(--ink-3); }
+  .err   { font-size: 11px; color: var(--error); font-weight: 500; display: none; }
+
+  .field.has-error .err            { display: block; }
+  .field.has-error input,
+  .field.has-error select          { border-color: var(--error); }
+
+  .phone-row { display: grid; grid-template-columns: 128px 1fr; gap: 8px; }
+  .divider   { border: none; border-top: 1px solid var(--paper-2); margin: 28px 0; }
+  .subsec    { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 18px; }
+
+  /* ── Footer actions ── */
+  .actions {
+    padding: 22px 36px;
+    border-top: 1px solid var(--paper-2);
+    background: var(--paper);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .actions .note { font-size: 12px; color: var(--ink-3); }
+  .actions .note strong { color: var(--ink-2); }
+
+  .btn {
+    height: 42px; padding: 0 24px; border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(200,65,10,0.25); }
+  .btn-primary:active { transform: none; box-shadow: none; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-ghost { background: transparent; color: var(--ink-2); border: 1px solid var(--paper-3); }
+  .btn-ghost:hover { background: var(--paper-2); }
+
+  .spinner { width: 15px; height: 15px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Success screen ── */
+  #success { display: none; text-align: center; padding: 80px 36px; }
+  #success .ring {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: var(--success-bg);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px; font-size: 32px;
+  }
+  #success h2 { font-family: 'DM Serif Display', serif; font-size: 28px; margin-bottom: 10px; }
+  #success p  { color: var(--ink-3); font-size: 14px; max-width: 400px; margin: 0 auto 6px; }
+  .ref-badge  {
+    display: inline-block; margin-top: 24px;
+    padding: 10px 20px; background: var(--paper-2); border-radius: var(--radius);
+    font-family: monospace; font-size: 13px; color: var(--ink-2); letter-spacing: 0.05em;
+  }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px; z-index: 300;
+    min-width: 260px; max-width: 400px;
+    padding: 14px 18px; border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.22s, transform 0.22s; pointer-events: none;
+  }
+  #toast.show { opacity: 1; transform: none; pointer-events: auto; }
+  #toast.ok  { background: #fff; border: 1px solid var(--paper-3); color: var(--ink); }
+  #toast.bad { background: #fef2f2; border: 1px solid #fecaca; color: var(--error); }
+  .t-body .t-title { font-weight: 600; }
+  .t-body .t-sub   { font-weight: 400; opacity: 0.8; margin-top: 2px; }
+
+  @media (max-width: 600px) {
+    .page { padding: 28px 14px 64px; }
+    .grid { grid-template-columns: 1fr; }
+    .grid .full { grid-column: 1; }
+    .sec-body, .actions, .sec-head { padding-left: 18px; padding-right: 18px; }
+    .site-header { padding: 0 18px; }
+    .intro h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">HRMS <span>·</span> Onboarding</div>
+  <span class="header-tag">New hire application</span>
+</header>
+
+<main class="page">
+  <div class="intro">
+    <div class="eyebrow">Employee onboarding application</div>
+    <h1>Starting something new?<br/>Fill in your details.</h1>
+    <p>Submit this form to begin your onboarding. HR will review and approve your application — you'll receive login credentials by email once approved.</p>
+    <div class="notice">
+      ℹ️ &nbsp;No account needed to submit this form. Your credentials will be created after HR approval.
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="form-view">
+      <form id="form" novalidate>
+
+        <!-- Personal details -->
+        <div class="sec-head">
+          <div class="sec-icon">👤</div>
+          <div>
+            <div class="sec-title">Personal details</div>
+            <div class="sec-desc">Your legal name, contact info, and someone we can reach in an emergency.</div>
+          </div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+
+            <div class="field" id="f-first_name">
+              <label>First name <span class="req">*</span></label>
+              <input type="text" id="first_name" placeholder="Jane" autocomplete="given-name"/>
+              <span class="err">First name is required</span>
+            </div>
+
+            <div class="field" id="f-last_name">
+              <label>Last name <span class="req">*</span></label>
+              <input type="text" id="last_name" placeholder="Smith" autocomplete="family-name"/>
+              <span class="err">Last name is required</span>
+            </div>
+
+            <div class="field full" id="f-email">
+              <label>Personal email <span class="req">*</span></label>
+              <input type="email" id="email" placeholder="jane.smith@gmail.com" autocomplete="email"/>
+              <span class="hint">Use your personal email — your work credentials will be sent here after approval.</span>
+              <span class="err">Enter a valid email address</span>
+            </div>
+
+            <div class="field full" id="f-phone">
+              <label>Phone number <span class="req">*</span></label>
+              <div class="phone-row">
+                <select id="phone_country_code">
+                  <option value="">Code</option>
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+65">🇸🇬 +65</option>
+                  <option value="+971">🇦🇪 +971</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+86">🇨🇳 +86</option>
+                </select>
+                <input type="tel" id="phone" placeholder="9876543210" maxlength="10" inputmode="numeric"/>
+              </div>
+              <span class="hint">Numbers only, exactly 10 digits.</span>
+              <span class="err">Select a country code and enter a valid 10-digit phone number</span>
+            </div>
+
+            <hr class="divider full"/>
+            <div class="subsec full">Emergency contact</div>
+
+            <div class="field" id="f-emergency_contact_name">
+              <label>Contact name <span class="req">*</span></label>
+              <input type="text" id="emergency_contact_name" placeholder="John Smith"/>
+              <span class="err">Emergency contact name is required</span>
+            </div>
+
+            <div class="field" id="f-emergency_contact_phone">
+              <label>Contact phone <span class="req">*</span></label>
+              <input type="tel" id="emergency_contact_phone" placeholder="9876543210" maxlength="10" inputmode="numeric"/>
+              <span class="hint">Numbers only, exactly 10 digits.</span>
+              <span class="err">Enter a valid 10-digit phone number</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Role & Employment -->
+        <div class="sec-head" style="border-top:1px solid var(--paper-2)">
+          <div class="sec-icon">💼</div>
+          <div>
+            <div class="sec-title">Role &amp; employment</div>
+            <div class="sec-desc">Your position, department, reporting line, and start date.</div>
+          </div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+
+            <div class="field" id="f-role">
+              <label>Role <span class="req">*</span></label>
+              <select id="role">
+                <option value="">Select role…</option>
+                <option>Software Engineer</option>
+                <option>Senior Software Engineer</option>
+                <option>Staff Engineer</option>
+                <option>Engineering Manager</option>
+                <option>Product Manager</option>
+                <option>Product Designer</option>
+                <option>Data Analyst</option>
+                <option>Data Scientist</option>
+                <option>DevOps Engineer</option>
+                <option>QA Engineer</option>
+                <option>HR Business Partner</option>
+                <option>Finance Analyst</option>
+                <option>Sales Executive</option>
+                <option>Marketing Manager</option>
+                <option>Operations Analyst</option>
+              </select>
+              <span class="err">Please select a role</span>
+            </div>
+
+            <div class="field" id="f-department">
+              <label>Department <span class="req">*</span></label>
+              <select id="department">
+                <option value="">Select department…</option>
+                <option>Engineering</option>
+                <option>Product</option>
+                <option>Design</option>
+                <option>Data &amp; Analytics</option>
+                <option>DevOps &amp; Infrastructure</option>
+                <option>Human Resources</option>
+                <option>Finance</option>
+                <option>Sales</option>
+                <option>Marketing</option>
+                <option>Operations</option>
+                <option>Legal &amp; Compliance</option>
+              </select>
+              <span class="err">Please select a department</span>
+            </div>
+
+            <div class="field" id="f-employment_type">
+              <label>Employment type <span class="req">*</span></label>
+              <select id="employment_type">
+                <option value="">Select type…</option>
+                <option value="full_time">Full-time</option>
+                <option value="part_time">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="intern">Intern</option>
+                <option value="consultant">Consultant</option>
+              </select>
+              <span class="err">Please select employment type</span>
+            </div>
+
+            <div class="field" id="f-joining_date">
+              <label>Proposed joining date <span class="req">*</span></label>
+              <input type="date" id="joining_date"/>
+              <span class="err">Please select a future date</span>
+            </div>
+
+            <div class="field full" id="f-manager_id">
+              <label>Reporting manager <span class="req">*</span></label>
+              <select id="manager_id">
+                <option value="">Select manager…</option>
+                <!-- In production: fetched from GET /managers API -->
+                <option value="MGR001">Sarah Chen — VP Engineering</option>
+                <option value="MGR002">Raj Patel — Head of Product</option>
+                <option value="MGR003">Priya Nair — HR Director</option>
+                <option value="MGR004">Amir Hassan — CFO</option>
+                <option value="MGR005">Laura Kim — Head of Design</option>
+              </select>
+              <span class="hint">Your direct reporting line. Used to set up workflow approvals.</span>
+              <span class="err">Please select a manager</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Work setup -->
+        <div class="sec-head" style="border-top:1px solid var(--paper-2)">
+          <div class="sec-icon">🏢</div>
+          <div>
+            <div class="sec-title">Work setup</div>
+            <div class="sec-desc">Location and working arrangement — used for IT provisioning.</div>
+          </div>
+        </div>
+        <div class="sec-body">
+          <div class="grid">
+
+            <div class="field" id="f-work_location">
+              <label>Work location <span class="req">*</span></label>
+              <select id="work_location">
+                <option value="">Select location…</option>
+                <option value="HQ_CHENNAI">HQ — Chennai</option>
+                <option value="HQ_BANGALORE">Office — Bangalore</option>
+                <option value="HQ_MUMBAI">Office — Mumbai</option>
+                <option value="HQ_DELHI">Office — Delhi</option>
+                <option value="HQ_HYDERABAD">Office — Hyderabad</option>
+                <option value="REMOTE_IN">Remote (India)</option>
+                <option value="REMOTE_INTL">Remote (International)</option>
+              </select>
+              <span class="err">Please select a work location</span>
+            </div>
+
+            <div class="field" id="f-work_mode">
+              <label>Work mode <span class="req">*</span></label>
+              <select id="work_mode">
+                <option value="">Select mode…</option>
+                <option value="onsite">On-site (5 days)</option>
+                <option value="hybrid_3">Hybrid (3 days office)</option>
+                <option value="hybrid_2">Hybrid (2 days office)</option>
+                <option value="remote">Fully remote</option>
+              </select>
+              <span class="err">Please select a work mode</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="note">Fields marked <strong>*</strong> are required. HR will review before approval.</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="button" class="btn btn-ghost" onclick="clearForm()">Clear</button>
+            <button type="submit" class="btn btn-primary" id="sub-btn">
+              <span id="btn-txt">Submit application</span>
+              <span id="btn-spin" class="spinner" style="display:none"></span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Success -->
+    <div id="success">
+      <div class="ring">📬</div>
+      <h2>Application received</h2>
+      <p>Your details have been submitted. HR will review and approve your application.</p>
+      <p>Once approved, your login credentials will be sent to <strong id="suc-email"></strong>.</p>
+      <p style="margin-top:8px;font-size:13px;color:var(--ink-3)">This usually takes 1–2 business days.</p>
+      <div class="ref-badge">Reference: <strong id="suc-ref"></strong></div>
+      <br/><br/>
+      <button class="btn btn-ghost" onclick="location.reload()">Submit another application</button>
+    </div>
+  </div>
+</main>
+
+<div id="toast">
+  <span id="t-icon" style="font-size:17px;flex-shrink:0"></span>
+  <div class="t-body">
+    <div class="t-title" id="t-title"></div>
+    <div class="t-sub"   id="t-sub"></div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+// Replace with your API Gateway invoke URL after deploying Task 2
+const API_BASE = 'https://grhj2ndewj.execute-api.ap-south-1.amazonaws.com/prod';
+// ────────────────────────────────────────────────────────
+
+// Validation
+const V = {
+  required: v => v.trim() !== '',
+  email:    v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+  phone:    v => /^\d{10}$/.test(v.replace(/\D/g,'')),
+};
+
+function fieldState(id, ok, msg) {
+  const wrap = document.getElementById('f-'+id);
+  if (!wrap) return;
+  const el  = wrap.querySelector('input,select');
+  const err = wrap.querySelector('.err');
+  wrap.classList.toggle('has-error', !ok);
+  if (el) {
+    el.classList.toggle('valid',   el.tagName==='INPUT' && ok);
+    el.classList.toggle('invalid', !ok);
+  }
+  if (err && msg && !ok) err.textContent = msg;
+}
+
+// Live validate email
+document.getElementById('email').addEventListener('input', function() {
+  if (this.value.length > 4) fieldState('email', V.email(this.value), 'Enter a valid email address');
+});
+// Live validate phones — strip non-digits, enforce 10-digit max
+['phone','emergency_contact_phone'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    const digits = this.value.replace(/\D/g, '').slice(0, 10);
+    this.value = digits;
+    const fieldId = id === 'phone' ? 'phone' : 'emergency_contact_phone';
+    if (digits.length > 0) fieldState(fieldId, digits.length === 10, 'Enter a valid 10-digit phone number');
+  });
+  el.addEventListener('keypress', function(e) {
+    if (!/[0-9]/.test(e.key)) e.preventDefault();
+  });
+});
+
+function validateAll() {
+  const rules = [
+    ['first_name',             'required', 'First name is required'],
+    ['last_name',              'required', 'Last name is required'],
+    ['email',                  'email',    'Enter a valid email address'],
+    ['phone_country_code',     'required', 'Select a country code'],
+    ['phone',                  'phone',    'Enter a valid 10-digit phone number'],
+    ['role',                   'required', 'Please select a role'],
+    ['department',             'required', 'Please select a department'],
+    ['employment_type',        'required', 'Please select employment type'],
+    ['joining_date',           'required', 'Please select a joining date'],
+    ['manager_id',             'required', 'Please select a manager'],
+    ['work_location',          'required', 'Please select a work location'],
+    ['work_mode',              'required', 'Please select a work mode'],
+    ['emergency_contact_name', 'required', 'Emergency contact name is required'],
+    ['emergency_contact_phone','phone',    'Enter a valid 10-digit phone number'],
+  ];
+  let ok = true;
+  rules.forEach(([id, type, msg]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const val = (id==='phone'||id==='emergency_contact_phone') ? el.value.replace(/\D/g,'') : el.value;
+    const valid = V[type](val);
+    fieldState(id, valid, msg);
+    if (!valid) ok = false;
+  });
+  // joining date must not be past
+  const jd = document.getElementById('joining_date');
+  if (jd.value) {
+    const d = new Date(jd.value), t = new Date(); t.setHours(0,0,0,0);
+    if (d < t) { fieldState('joining_date', false, 'Joining date cannot be in the past'); ok = false; }
+  }
+  return ok;
+}
+
+// Submit
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!validateAll()) {
+    toast('bad','Validation errors','Please fix the highlighted fields.');
+    document.querySelector('.has-error input, .has-error select')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  const btn = document.getElementById('sub-btn');
+  document.getElementById('btn-txt').textContent = 'Submitting…';
+  document.getElementById('btn-spin').style.display = 'block';
+  btn.disabled = true;
+
+  const payload = {
+    first_name:             document.getElementById('first_name').value.trim(),
+    last_name:              document.getElementById('last_name').value.trim(),
+    email:                  document.getElementById('email').value.trim().toLowerCase(),
+    phone_country_code:     document.getElementById('phone_country_code').value,
+    phone:                  document.getElementById('phone').value.replace(/\D/g,''),
+    role:                   document.getElementById('role').value,
+    department:             document.getElementById('department').value,
+    employment_type:        document.getElementById('employment_type').value,
+    joining_date:           document.getElementById('joining_date').value,
+    manager_id:             document.getElementById('manager_id').value,
+    work_location:          document.getElementById('work_location').value,
+    work_mode:              document.getElementById('work_mode').value,
+    emergency_contact_name: document.getElementById('emergency_contact_name').value.trim(),
+    emergency_contact_phone:document.getElementById('emergency_contact_phone').value.replace(/\D/g,''),
+    status:                 'pending_approval',
+    submitted_at:           new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/employees`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(()=>({}));
+      throw new Error(body.message || `Error ${res.status}`);
+    }
+
+    const data = await res.json();
+
+    // Show success screen — use employee_id returned by the backend
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('success').style.display   = 'block';
+    document.getElementById('suc-email').textContent   = payload.email;
+    document.getElementById('suc-ref').textContent     = data.employee_id;
+    toast('ok','Application submitted','HR will review and be in touch.');
+
+  } catch(err) {
+    toast('bad','Submission failed', err.message || 'Could not reach server. Please try again.');
+    btn.disabled = false;
+    document.getElementById('btn-txt').textContent = 'Submit application';
+    document.getElementById('btn-spin').style.display = 'none';
+  }
+});
+
+function clearForm() {
+  document.getElementById('form').reset();
+  document.querySelectorAll('.field').forEach(f => {
+    f.classList.remove('has-error');
+    f.querySelectorAll('input,select').forEach(el => el.classList.remove('valid','invalid'));
+  });
+}
+
+let _tt;
+function toast(type, title, sub) {
+  const t = document.getElementById('toast');
+  document.getElementById('t-icon').textContent  = type==='ok' ? '✅' : '⚠️';
+  document.getElementById('t-title').textContent = title;
+  document.getElementById('t-sub').textContent   = sub;
+  t.className = 'show '+type;
+  clearTimeout(_tt);
+  _tt = setTimeout(()=>{ t.className = type; }, 5000);
+}
+
+// Set min date
+document.getElementById('joining_date').min = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

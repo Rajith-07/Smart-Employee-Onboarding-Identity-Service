@@ -1,0 +1,2023 @@
+<!-- 
+ no doc view option - can upload only once
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Onboarding Portal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@6/dist/amazon-cognito-identity.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ─── TOKENS ──────────────────────────────────────────── */
+:root {
+  --bg:        #f5f4f0;
+  --surface:   #ffffff;
+  --border:    #e2ddd6;
+  --ink:       #1a1714;
+  --muted:     #6f6a64;
+  --accent:    #1a6b5a;
+  --accent2:   #3a8f7c;
+  --green:     #1a6b5a;
+  --red:       #c0392b;
+  --amber:     #b5600d;
+  --radius:    12px;
+  --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+a { color: var(--accent2); text-decoration: none; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════
+   AUTH SCREENS
+══════════════════════════════════ */
+.auth-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: radial-gradient(ellipse 80% 60% at 60% 20%, rgba(26,107,90,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 80% at 10% 80%, rgba(58,143,124,0.04) 0%, transparent 60%);
+}
+
+.auth-card {
+  width: 100%; max-width: 420px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 20px; padding: 48px 40px 40px;
+  position: relative; overflow: hidden;
+}
+.auth-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+.auth-card.anim-in  { animation: authIn  0.45s cubic-bezier(0.4,0,0.2,1) both; }
+.auth-card.anim-out { animation: authOut 0.3s  cubic-bezier(0.4,0,0.2,1) both; }
+@keyframes authIn  { from { opacity:0; transform:translateY(20px) scale(0.98); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes authOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(-12px); } }
+
+.auth-logo { display:flex; align-items:center; gap:10px; margin-bottom:40px; }
+.auth-logo-mark {
+  width:36px; height:36px; border-radius:8px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:700; color:white;
+}
+.auth-logo-text { font-family:'DM Serif Display',serif; font-size:18px; letter-spacing:-0.3px; }
+.auth-logo-text span { color:var(--accent); }
+
+.auth-heading { font-family:'DM Serif Display',serif; font-size:28px; line-height:1.2; margin-bottom:6px; }
+.auth-sub { color:var(--muted); font-size:14px; margin-bottom:36px; line-height:1.5; }
+
+.auth-context-banner {
+  display:flex; align-items:flex-start; gap:10px;
+  background:rgba(26,107,90,0.05); border:1px solid rgba(26,107,90,0.18);
+  border-radius:10px; padding:12px 14px; margin-bottom:28px;
+}
+.auth-context-banner .banner-icon { font-size:17px; flex-shrink:0; margin-top:1px; }
+.auth-context-banner .banner-text { font-size:13px; color:var(--muted); line-height:1.55; }
+.auth-context-banner .banner-text strong { color:var(--accent); font-weight:600; }
+
+.field { margin-bottom:20px; }
+.field label { display:block; font-size:12px; font-weight:500; letter-spacing:0.08em; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+
+.pw-wrap { position:relative; }
+.pw-wrap input {
+  width:100%; padding:12px 42px 12px 16px; background:var(--bg); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--ink); font-size:14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.pw-wrap input:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,107,90,0.12); }
+.pw-toggle {
+  position:absolute; right:13px; top:50%; transform:translateY(-50%);
+  background:none; border:none; padding:4px; cursor:pointer; color:var(--muted);
+  font-size:15px; line-height:1; transition:color 0.15s;
+}
+.pw-toggle:hover { color:var(--ink); }
+
+.field input[type="email"] {
+  width:100%; padding:12px 16px; background:var(--bg); border:1px solid var(--border);
+  border-radius:var(--radius); color:var(--ink); font-size:14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.field input[type="email"]:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,107,90,0.12); }
+
+.pw-strength { margin-top:8px; }
+.pw-strength-bar { height:3px; border-radius:99px; background:var(--border); overflow:hidden; margin-bottom:5px; }
+.pw-strength-fill { height:100%; border-radius:99px; transition:width 0.3s ease, background 0.3s ease; width:0%; }
+.pw-strength-label { font-size:11px; color:var(--muted); }
+
+.pw-reqs { margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; }
+.pw-req { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; transition:color 0.2s; }
+.pw-req.met { color:var(--green); }
+.pw-req-dot { width:6px; height:6px; border-radius:50%; background:var(--border); flex-shrink:0; transition:background 0.2s; }
+.pw-req.met .pw-req-dot { background:var(--green); }
+
+.auth-btn {
+  width:100%; padding:14px; border-radius:var(--radius);
+  background: linear-gradient(135deg, var(--accent), #155c4d);
+  color:white; font-size:15px; font-weight:600;
+  transition: opacity var(--transition), transform var(--transition); margin-top:8px;
+}
+.auth-btn:hover { opacity:0.9; transform:translateY(-1px); }
+.auth-btn:disabled { opacity:0.5; pointer-events:none; }
+
+.auth-error { color:var(--red); font-size:13px; margin-top:14px; text-align:center; min-height:18px; }
+
+.auth-footer { margin-top:28px; padding-top:20px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); text-align:center; line-height:1.6; }
+.auth-back-link { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); cursor:pointer; margin-bottom:20px; transition:color 0.15s; }
+.auth-back-link:hover { color:var(--ink); }
+
+/* ── APP ── */
+#app { display:none; min-height:100vh; }
+
+/* ── TOPBAR ── */
+#topbar {
+  position:sticky; top:0; z-index:100;
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:0 32px; display:flex; align-items:center; justify-content:space-between; height:60px;
+}
+.topbar-logo { font-family:'DM Serif Display',serif; font-size:17px; display:flex; align-items:center; gap:10px; }
+.topbar-logo-mark {
+  width:28px; height:28px; border-radius:6px;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:white;
+}
+.topbar-right { display:flex; align-items:center; gap:16px; }
+#topbar-name { font-size:13px; color:var(--muted); }
+#logout-btn {
+  padding:7px 14px; border-radius:8px; font-size:13px; font-weight:500;
+  background:transparent; border:1px solid var(--border); color:var(--muted);
+  transition:all var(--transition);
+}
+#logout-btn:hover { border-color:var(--red); color:var(--red); }
+
+/* ── LAYOUT ── */
+.layout { display:flex; }
+#sidebar {
+  width:240px; min-height:calc(100vh - 60px); border-right:1px solid var(--border);
+  padding:28px 16px; position:sticky; top:60px; align-self:flex-start; flex-shrink:0;
+}
+.progress-label { font-size:11px; font-weight:600; letter-spacing:0.1em; color:var(--muted); text-transform:uppercase; margin-bottom:14px; padding:0 8px; }
+.progress-bar-wrap { background:var(--border); border-radius:99px; height:5px; margin-bottom:8px; overflow:hidden; }
+.progress-bar-fill { height:100%; border-radius:99px; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width 0.5s ease; }
+#progress-pct { font-size:11px; color:var(--muted); margin-bottom:20px; }
+.nav-item {
+  display:flex; align-items:center; gap:12px; padding:11px 12px; border-radius:10px;
+  font-size:14px; font-weight:400; color:var(--muted); cursor:pointer;
+  transition:all var(--transition); margin-bottom:4px;
+}
+.nav-item:hover { background:rgba(26,107,90,0.04); color:var(--ink); }
+.nav-item.active { background:rgba(26,107,90,0.08); color:var(--accent); font-weight:500; }
+.nav-icon { font-size:17px; width:22px; text-align:center; }
+.nav-badge { margin-left:auto; font-size:10px; font-weight:600; background:var(--accent); color:white; padding:2px 7px; border-radius:99px; }
+.nav-badge.done { background:rgba(26,107,90,0.12); color:var(--green); }
+
+/* ── CONTENT ── */
+#content { flex:1; padding:40px 48px; max-width:900px; }
+.page { display:none; animation:fadeUp 0.35s ease both; }
+.page.active { display:block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+.welcome-hero { margin-bottom:40px; }
+.welcome-eyebrow { font-size:12px; font-weight:500; letter-spacing:0.1em; color:var(--accent); text-transform:uppercase; margin-bottom:8px; }
+.welcome-heading { font-family:'DM Serif Display',serif; font-size:36px; line-height:1.1; margin-bottom:10px; }
+.welcome-heading em { font-style:italic; color:var(--accent); }
+.welcome-sub { color:var(--muted); font-size:15px; max-width:480px; line-height:1.6; }
+
+.step-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:32px; }
+.step-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  padding:24px; cursor:pointer; transition:all var(--transition); position:relative; overflow:hidden;
+}
+.step-card:hover { border-color:rgba(26,107,90,0.35); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.08); }
+.step-card.completed { opacity:0.65; }
+.step-card-icon { font-size:28px; margin-bottom:14px; }
+.step-card-title { font-size:16px; font-weight:600; margin-bottom:4px; }
+.step-card-desc { font-size:13px; color:var(--muted); line-height:1.5; }
+.step-card-status { margin-top:16px; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; padding:4px 10px; border-radius:99px; }
+.step-card-status.pending { background:rgba(26,107,90,0.08); color:var(--accent); }
+.step-card-status.done    { background:rgba(26,107,90,0.1);  color:var(--green); }
+
+.section-eyebrow { font-size:11px; font-weight:600; letter-spacing:0.1em; color:var(--accent); text-transform:uppercase; margin-bottom:6px; }
+.section-heading { font-family:'DM Serif Display',serif; font-size:26px; margin-bottom:4px; }
+.section-sub { color:var(--muted); font-size:14px; margin-bottom:32px; }
+.divider { height:1px; background:var(--border); margin:32px 0; }
+
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.form-field { display:flex; flex-direction:column; gap:8px; }
+.form-field.full { grid-column:1/-1; }
+.form-field label { font-size:12px; font-weight:500; letter-spacing:0.06em; color:var(--muted); text-transform:uppercase; }
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding:12px 14px; background:var(--bg); border:1px solid var(--border);
+  border-radius:10px; color:var(--ink); font-size:14px;
+  transition:border-color var(--transition), box-shadow var(--transition);
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(26,107,90,0.1); }
+.form-field select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%236f6a64' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+.form-field textarea { resize:vertical; min-height:100px; }
+
+.submit-btn {
+  margin-top:8px; padding:13px 28px; border-radius:10px;
+  background:linear-gradient(135deg, var(--accent), #155c4d);
+  color:white; font-size:14px; font-weight:600;
+  transition:all var(--transition); display:inline-flex; align-items:center; gap:8px;
+}
+.submit-btn:hover { opacity:0.9; transform:translateY(-1px); }
+.submit-btn:disabled { opacity:0.5; pointer-events:none; }
+
+.success-banner {
+  display:none; align-items:center; gap:12px;
+  background:rgba(26,107,90,0.06); border:1px solid rgba(26,107,90,0.2);
+  border-radius:10px; padding:14px 18px; font-size:14px; color:var(--green); margin-bottom:24px;
+}
+
+.api-error-banner {
+  display:none; align-items:center; gap:10px;
+  background:rgba(192,57,43,0.06); border:1px solid rgba(192,57,43,0.2);
+  border-radius:10px; padding:12px 16px; font-size:13px; color:var(--red); margin-bottom:16px;
+}
+.api-error-banner.show { display:flex; }
+
+/* ── VALIDATION BANNER — missing docs ── */
+.docs-validation-banner {
+  display:none;
+  background:rgba(181,96,13,0.06); border:1px solid rgba(181,96,13,0.25);
+  border-radius:10px; padding:14px 18px; margin-bottom:20px;
+}
+.docs-validation-banner.show { display:block; }
+.docs-validation-banner-title {
+  font-size:13px; font-weight:600; color:var(--amber); margin-bottom:8px;
+  display:flex; align-items:center; gap:7px;
+}
+.docs-validation-banner-list {
+  list-style:none; display:flex; flex-direction:column; gap:4px;
+}
+.docs-validation-banner-list li {
+  font-size:13px; color:var(--amber); display:flex; align-items:center; gap:7px;
+}
+.docs-validation-banner-list li::before { content:'›'; font-weight:700; }
+
+/* ── RESUME RETRY BANNER ── */
+.resume-retry-banner {
+  display:none; align-items:flex-start; gap:12px;
+  background:rgba(181,96,13,0.06); border:1px solid rgba(181,96,13,0.25);
+  border-radius:10px; padding:14px 18px; margin-bottom:20px;
+}
+.resume-retry-banner.show { display:flex; }
+.resume-retry-banner-body { flex:1; }
+.resume-retry-banner-title { font-size:13px; font-weight:600; color:var(--amber); margin-bottom:3px; }
+.resume-retry-banner-desc { font-size:12px; color:var(--muted); line-height:1.55; margin-bottom:10px; }
+.resume-retry-btn {
+  padding:7px 16px; border-radius:8px; font-size:12px; font-weight:600;
+  background:rgba(181,96,13,0.1); color:var(--amber);
+  border:1px solid rgba(181,96,13,0.3); cursor:pointer; transition:0.2s;
+}
+.resume-retry-btn:hover { background:rgba(181,96,13,0.18); }
+
+/* ── DOCUMENT TABLE ── */
+.doc-table { border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:28px; }
+.doc-table-header {
+  display:flex; justify-content:space-between; padding:10px 16px;
+  background:var(--bg); font-size:11px; font-weight:600; letter-spacing:0.08em;
+  color:var(--muted); text-transform:uppercase; border-bottom:1px solid var(--border);
+}
+.doc-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 16px; border-top:1px solid var(--border); font-size:14px;
+  transition:background var(--transition);
+}
+.doc-row:first-of-type { border-top:none; }
+.doc-row:hover { background:rgba(26,107,90,0.02); }
+.doc-row-label { display:flex; align-items:center; gap:10px; }
+.doc-row-actions { display:flex; align-items:center; gap:8px; }
+
+.doc-file-list { padding:0 16px 12px; display:flex; flex-direction:column; gap:6px; }
+
+/* ── FILE ITEM ── */
+.file-item {
+  display:flex; align-items:center; gap:10px;
+  background:var(--bg); border:1px solid var(--border); border-radius:8px;
+  padding:8px 12px; font-size:13px;
+}
+.file-item.is-saved { border-color:rgba(26,107,90,0.2); background:rgba(26,107,90,0.02); }
+.file-item-name { flex:1; color:var(--ink); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.file-item-size { color:var(--muted); font-size:12px; flex-shrink:0; }
+.file-item-remove { color:var(--muted); cursor:pointer; font-size:15px; flex-shrink:0; transition:color 0.15s; line-height:1; background:none; border:none; padding:2px; }
+.file-item-remove:hover { color:var(--red); }
+.file-item-status {
+  font-size:11px; flex-shrink:0; padding:2px 7px; border-radius:6px;
+  background:rgba(0,0,0,0.04); color:var(--muted); transition:all 0.2s;
+}
+.file-item-status.uploading { color:var(--amber); background:rgba(181,96,13,0.08); }
+.file-item-status.done      { color:var(--green); background:rgba(26,107,90,0.08); }
+.file-item-status.error     { color:var(--red);   background:rgba(192,57,43,0.08); }
+
+.view-btn {
+  padding:6px 14px; border-radius:8px; font-size:12px; font-weight:500;
+  background:rgba(26,107,90,0.08); color:var(--accent);
+  border:1px solid rgba(26,107,90,0.2); cursor:pointer; transition:0.2s; white-space:nowrap;
+}
+.view-btn:hover { background:rgba(26,107,90,0.14); }
+.replace-btn {
+  padding:6px 14px; border-radius:8px; font-size:12px; font-weight:500;
+  background:transparent; color:var(--muted);
+  border:1px solid var(--border); cursor:pointer; transition:0.2s; white-space:nowrap;
+}
+.replace-btn:hover { border-color:var(--accent); color:var(--accent); }
+.replace-btn:disabled { opacity:0.45; pointer-events:none; }
+
+/* ── DOCUMENT LINKS PANEL (home dashboard) ── */
+.doc-links-panel {
+  background:var(--surface); border:1px solid var(--border); border-radius:16px;
+  overflow:hidden; margin-top:32px;
+}
+.doc-links-panel-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; border-bottom:1px solid var(--border);
+}
+.doc-links-panel-title {
+  font-size:13px; font-weight:600; letter-spacing:0.06em;
+  color:var(--muted); text-transform:uppercase;
+}
+.doc-links-panel-subtitle { font-size:12px; color:var(--muted); }
+.doc-links-empty {
+  padding:28px 20px; text-align:center; font-size:13px; color:var(--muted); line-height:1.6;
+}
+.doc-link-row {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 20px; border-top:1px solid var(--border);
+  transition:background var(--transition); cursor:default;
+}
+.doc-link-row:first-of-type { border-top:none; }
+.doc-link-row:hover { background:rgba(26,107,90,0.02); }
+.doc-link-icon {
+  width:36px; height:36px; border-radius:8px; flex-shrink:0;
+  background:rgba(26,107,90,0.07); display:flex; align-items:center;
+  justify-content:center; font-size:17px;
+}
+.doc-link-info { flex:1; min-width:0; }
+.doc-link-name { font-size:14px; font-weight:500; color:var(--ink); margin-bottom:2px; }
+.doc-link-meta { font-size:12px; color:var(--muted); }
+.doc-link-status {
+  font-size:11px; font-weight:600; padding:3px 9px; border-radius:6px; flex-shrink:0;
+}
+.doc-link-status.status-uploaded  { background:rgba(26,107,90,0.08); color:var(--green); }
+.doc-link-status.status-pending   { background:rgba(181,96,13,0.08); color:var(--amber); }
+.doc-link-status.status-approved  { background:rgba(26,107,90,0.12); color:var(--green); }
+.doc-link-status.status-rejected  { background:rgba(192,57,43,0.08); color:var(--red); }
+.doc-link-status.status-reupload  { background:rgba(192,57,43,0.06); color:var(--red); }
+.doc-link-open {
+  flex-shrink:0; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:500;
+  background:rgba(26,107,90,0.08); color:var(--accent);
+  border:1px solid rgba(26,107,90,0.2); cursor:pointer; transition:0.2s; white-space:nowrap;
+  text-decoration:none; display:inline-flex; align-items:center; gap:5px;
+}
+.doc-link-open:hover { background:rgba(26,107,90,0.16); }
+
+/* ── POLICY LIST ── */
+.policy-list { display:flex; flex-direction:column; gap:12px; }
+.policy-item {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:20px 24px; display:flex; align-items:center; gap:16px; transition:border-color var(--transition);
+}
+.policy-item.signed { border-color:rgba(26,107,90,0.3); }
+.policy-icon { font-size:22px; flex-shrink:0; }
+.policy-info { flex:1; }
+.policy-name { font-size:15px; font-weight:500; margin-bottom:2px; }
+.policy-name-link { color:var(--ink); text-decoration:none; border-bottom:1px dashed transparent; transition:all var(--transition); }
+.policy-name-link:hover { color:var(--accent); border-bottom-color:rgba(26,107,90,0.35); }
+.policy-meta { font-size:12px; color:var(--muted); }
+.policy-action { padding:9px 18px; border-radius:8px; font-size:13px; font-weight:600; transition:all var(--transition); }
+.policy-action.sign-btn { background:rgba(26,107,90,0.08); color:var(--accent); border:1px solid rgba(26,107,90,0.2); }
+.policy-action.sign-btn:hover { background:rgba(26,107,90,0.14); }
+.policy-action.signed-badge { background:rgba(26,107,90,0.06); color:var(--green); border:1px solid rgba(26,107,90,0.15); cursor:default; }
+
+/* ── IT CHECKLIST ── */
+.it-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.it-item {
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:20px; display:flex; align-items:flex-start; gap:14px; transition:all var(--transition);
+}
+.it-item.done-item { border-color:rgba(26,107,90,0.25); }
+.it-checkbox {
+  width:20px; height:20px; border-radius:5px; flex-shrink:0;
+  border:2px solid var(--border); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all var(--transition); margin-top:2px;
+}
+.it-item.done-item .it-checkbox { background:var(--green); border-color:var(--green); }
+.it-check-svg { display:none; }
+.it-item.done-item .it-check-svg { display:block; }
+.it-info { flex:1; }
+.it-title { font-size:14px; font-weight:500; margin-bottom:3px; }
+.it-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+.it-status-tag { font-size:11px; font-weight:600; padding:3px 8px; border-radius:6px; margin-top:8px; display:inline-block; }
+.it-status-tag.pending-tag { background:rgba(181,96,13,0.08);  color:var(--amber); }
+.it-status-tag.done-tag    { background:rgba(26,107,90,0.08);  color:var(--green); }
+.it-status-tag.auto-tag    { background:rgba(58,143,124,0.08); color:var(--accent2); }
+
+/* ── SCHEDULER ── */
+.time-slots { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:24px; }
+.slot-btn {
+  padding:12px; border-radius:10px; font-size:13px; font-weight:500;
+  background:var(--surface); border:1px solid var(--border); color:var(--muted);
+  transition:all var(--transition); text-align:center;
+}
+.slot-btn:hover { border-color:var(--accent); color:var(--ink); }
+.slot-btn.selected { background:rgba(26,107,90,0.08); border-color:var(--accent); color:var(--accent); font-weight:600; }
+.slot-btn.booked   { opacity:0.35; pointer-events:none; text-decoration:line-through; }
+.manager-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:20px 24px; display:flex; align-items:center; gap:18px; margin-bottom:28px;
+}
+.manager-avatar {
+  width:50px; height:50px; border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex; align-items:center; justify-content:center;
+  font-family:'DM Serif Display',serif; font-size:20px; color:white; flex-shrink:0;
+}
+.manager-name { font-size:16px; font-weight:600; margin-bottom:3px; }
+.manager-role { font-size:13px; color:var(--muted); }
+
+/* ── TOAST ── */
+#toast {
+  position:fixed; bottom:28px; right:28px; z-index:9999;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:14px 20px; display:flex; align-items:center; gap:12px;
+  font-size:14px; font-weight:500; box-shadow:0 8px 32px rgba(0,0,0,0.12);
+  transform:translateY(80px); opacity:0; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); max-width:360px;
+}
+#toast.show { transform:translateY(0); opacity:1; }
+#toast-icon { font-size:18px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — LOGIN
+══════════════════════════════════════════ -->
+<div id="login-screen" class="auth-screen">
+  <div class="auth-card anim-in">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">H</div>
+      <div class="auth-logo-text">hr<span>ms</span></div>
+    </div>
+    <h1 class="auth-heading">Welcome aboard.</h1>
+    <p class="auth-sub">Sign in with the temporary credentials sent to your work email.</p>
+
+    <div class="field">
+      <label>Work Email</label>
+      <input type="email" id="email-input" placeholder="you@company.com" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>Temporary Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="pw-input" placeholder="Check your welcome email" autocomplete="current-password" />
+        <button class="pw-toggle" type="button" onclick="togglePw('pw-input',this)" title="Show/hide">👁</button>
+      </div>
+    </div>
+
+    <button class="auth-btn" id="login-btn" onclick="handleLogin()">Sign In →</button>
+    <div class="auth-error" id="login-error"></div>
+
+    <div class="auth-footer">
+      Credentials emailed by HR. No access? Contact <a href="/cdn-cgi/l/email-protection#6f071d2f0c00021f0e0116410c0002"><span class="__cf_email__" data-cfemail="3a52487a5955574a5b544314595557">[email&#160;protected]</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — SET NEW PASSWORD
+══════════════════════════════════════════ -->
+<div id="newpw-screen" class="auth-screen" style="display:none;">
+  <div class="auth-card anim-in">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">H</div>
+      <div class="auth-logo-text">hr<span>ms</span></div>
+    </div>
+
+    <button class="auth-back-link" onclick="backToLogin()">← Back to sign in</button>
+
+    <h1 class="auth-heading">Set your password.</h1>
+    <p class="auth-sub">Your temporary password has expired. Create a permanent one to continue.</p>
+
+    <div class="auth-context-banner">
+      <span class="banner-icon">🔐</span>
+      <div class="banner-text">
+        Setting password for <strong id="newpw-email-label"></strong>.<br/>
+        This replaces your one-time temporary password.
+      </div>
+    </div>
+
+    <div class="field">
+      <label>New Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="newpw-input" placeholder="Min 8 characters" autocomplete="new-password"
+               oninput="evalPassword(this.value)" />
+        <button class="pw-toggle" type="button" onclick="togglePw('newpw-input',this)" title="Show/hide">👁</button>
+      </div>
+      <div class="pw-strength">
+        <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+        <div class="pw-strength-label" id="pw-strength-label">Enter a password</div>
+      </div>
+      <div class="pw-reqs" id="pw-reqs">
+        <div class="pw-req" id="req-len"><span class="pw-req-dot"></span>8+ characters</div>
+        <div class="pw-req" id="req-upper"><span class="pw-req-dot"></span>Uppercase letter</div>
+        <div class="pw-req" id="req-lower"><span class="pw-req-dot"></span>Lowercase letter</div>
+        <div class="pw-req" id="req-num"><span class="pw-req-dot"></span>Number</div>
+        <div class="pw-req" id="req-special"><span class="pw-req-dot"></span>Special character</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Confirm New Password</label>
+      <div class="pw-wrap">
+        <input type="password" id="newpw-confirm" placeholder="Repeat password" autocomplete="new-password"
+               oninput="checkConfirm()" />
+        <button class="pw-toggle" type="button" onclick="togglePw('newpw-confirm',this)" title="Show/hide">👁</button>
+      </div>
+    </div>
+
+    <button class="auth-btn" id="newpw-btn" onclick="handleSetPassword()">Set Password & Continue →</button>
+    <div class="auth-error" id="newpw-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════ -->
+<div id="app">
+  <div id="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-mark">H</div>
+      hrms
+    </div>
+    <div class="topbar-right">
+      <span id="topbar-name"></span>
+      <button id="logout-btn" onclick="handleLogout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav id="sidebar">
+      <div class="progress-label">Your Progress</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div id="progress-pct">0 of 4 steps complete</div>
+      <div class="nav-item active" onclick="showPage('home',this)"><span class="nav-icon">⌂</span> Overview</div>
+      <div class="nav-item" id="nav-docs" onclick="showPage('docs',this)">
+        <span class="nav-icon">📋</span> Documents <span class="nav-badge" id="badge-docs">Pending</span>
+      </div>
+      <div class="nav-item" id="nav-it" onclick="showPage('it',this)">
+        <span class="nav-icon">💻</span> IT Setup <span class="nav-badge" id="badge-it">Pending</span>
+      </div>
+      <div class="nav-item" id="nav-policy" onclick="showPage('policy',this)">
+        <span class="nav-icon">📜</span> Policy Sign-off <span class="nav-badge" id="badge-policy">Pending</span>
+      </div>
+      <div class="nav-item" id="nav-meeting" onclick="showPage('meeting',this)">
+        <span class="nav-icon">📅</span> Manager Intro <span class="nav-badge" id="badge-meeting">Pending</span>
+      </div>
+    </nav>
+
+    <main id="content">
+
+      <!-- HOME -->
+      <div id="page-home" class="page active">
+        <div class="welcome-hero">
+          <div class="welcome-eyebrow">New Hire Onboarding</div>
+          <h2 class="welcome-heading">Let's get you <em>settled in.</em></h2>
+          <p class="welcome-sub">Four steps to complete before your first day. Each takes only a few minutes.</p>
+        </div>
+        <div class="step-grid">
+          <div class="step-card" id="card-docs" onclick="showPage('docs',document.getElementById('nav-docs'))">
+            <div class="step-card-icon">📋</div>
+            <div class="step-card-title">Document Submission</div>
+            <div class="step-card-desc">Upload your NDA, offer letter, ID proof, and certificates.</div>
+            <div class="step-card-status pending" id="card-docs-status">⬤ Pending</div>
+          </div>
+          <div class="step-card" id="card-it" onclick="showPage('it',document.getElementById('nav-it'))">
+            <div class="step-card-icon">💻</div>
+            <div class="step-card-title">IT Provisioning</div>
+            <div class="step-card-desc">Confirm your device preference, software needs, and access requests.</div>
+            <div class="step-card-status pending" id="card-it-status">⬤ Pending</div>
+          </div>
+          <div class="step-card" id="card-policy" onclick="showPage('policy',document.getElementById('nav-policy'))">
+            <div class="step-card-icon">📜</div>
+            <div class="step-card-title">Policy Sign-off</div>
+            <div class="step-card-desc">Review and acknowledge four company policies digitally.</div>
+            <div class="step-card-status pending" id="card-policy-status">⬤ Pending</div>
+          </div>
+          <div class="step-card" id="card-meeting" onclick="showPage('meeting',document.getElementById('nav-meeting'))">
+            <div class="step-card-icon">📅</div>
+            <div class="step-card-title">Manager Intro</div>
+            <div class="step-card-desc">Schedule a 30-minute intro call with your reporting manager.</div>
+            <div class="step-card-status pending" id="card-meeting-status">⬤ Pending</div>
+          </div>
+        </div>
+
+        <!-- ── SUBMITTED DOCUMENT LINKS ── -->
+        <div class="doc-links-panel" id="home-doc-links-panel" style="display:none;">
+          <div class="doc-links-panel-header">
+            <span class="doc-links-panel-title">📎 Submitted Documents</span>
+            <span class="doc-links-panel-subtitle" id="home-doc-links-subtitle"></span>
+          </div>
+          <div id="home-doc-links-body">
+            <div class="doc-links-empty">No documents submitted yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DOCUMENTS -->
+      <div id="page-docs" class="page">
+        <div class="section-eyebrow">Step 1 of 4</div>
+        <h2 class="section-heading">Document Submission</h2>
+        <p class="section-sub">Upload each required document. Accepted formats: PDF, JPG, PNG (max 5 MB each).</p>
+
+        <!-- Validation banner: shown when some docs are missing on submit -->
+        <div class="docs-validation-banner" id="docs-validation-banner">
+          <div class="docs-validation-banner-title">
+            ⚠️ Please upload all required documents before submitting
+          </div>
+          <ul class="docs-validation-banner-list" id="docs-missing-list"></ul>
+        </div>
+
+        <!-- Resume-onboarding retry banner -->
+        <div class="resume-retry-banner" id="resume-retry-banner">
+          <span style="font-size:20px;flex-shrink:0;">🔄</span>
+          <div class="resume-retry-banner-body">
+            <div class="resume-retry-banner-title">Documents saved — workflow sync pending</div>
+            <div class="resume-retry-banner-desc">
+              Your documents were uploaded successfully, but we couldn't notify the onboarding workflow.
+              This won't affect your submission — click Retry to sync, or continue and HR will pick it up automatically.
+            </div>
+            <button class="resume-retry-btn" id="resume-retry-btn" onclick="retryResumeOnboarding()">↩ Retry Sync</button>
+          </div>
+        </div>
+
+        <div class="success-banner" id="docs-success">
+          <span>✅</span> Documents submitted successfully. HR will review within 2 business days.
+        </div>
+        <div class="api-error-banner" id="docs-error"></div>
+
+        <div class="doc-table">
+          <div class="doc-table-header">
+            <span>Document</span>
+            <span>Status / Action</span>
+          </div>
+
+          <!-- NDA -->
+          <div class="doc-row" id="row-nda">
+            <span class="doc-row-label">📄 NDA</span>
+            <div class="doc-row-actions">
+              <input type="file" id="file-nda" hidden accept=".pdf,.jpg,.jpeg,.png"
+                     onchange="addFile(this,'list-nda','nda')" />
+              <button class="view-btn" id="upload-btn-nda" onclick="document.getElementById('file-nda').click()">Upload</button>
+            </div>
+          </div>
+          <div class="doc-file-list" id="list-nda"></div>
+
+          <!-- Offer Letter -->
+          <div class="doc-row" id="row-offer">
+            <span class="doc-row-label">📄 Offer Letter</span>
+            <div class="doc-row-actions">
+              <input type="file" id="file-offer" hidden accept=".pdf,.jpg,.jpeg,.png"
+                     onchange="addFile(this,'list-offer','offer_letter')" />
+              <button class="view-btn" id="upload-btn-offer" onclick="document.getElementById('file-offer').click()">Upload</button>
+            </div>
+          </div>
+          <div class="doc-file-list" id="list-offer"></div>
+
+          <!-- ID Proof -->
+          <div class="doc-row" id="row-id">
+            <span class="doc-row-label">🪪 ID Proof</span>
+            <div class="doc-row-actions">
+              <input type="file" id="file-id" hidden accept=".pdf,.jpg,.jpeg,.png"
+                     onchange="addFile(this,'list-id','id_proof')" />
+              <button class="view-btn" id="upload-btn-id" onclick="document.getElementById('file-id').click()">Upload</button>
+            </div>
+          </div>
+          <div class="doc-file-list" id="list-id"></div>
+
+          <!-- Education -->
+          <div class="doc-row" id="row-edu">
+            <span class="doc-row-label">🎓 Educational Certificate</span>
+            <div class="doc-row-actions">
+              <input type="file" id="file-edu" hidden multiple accept=".pdf,.jpg,.jpeg,.png"
+                     onchange="addFile(this,'list-edu','education')" />
+              <button class="view-btn" id="upload-btn-edu" onclick="document.getElementById('file-edu').click()">Upload</button>
+            </div>
+          </div>
+          <div class="doc-file-list" id="list-edu"></div>
+
+          <!-- Bank Details -->
+          <div class="doc-row" id="row-bank">
+            <span class="doc-row-label">🏦 Bank Details Form</span>
+            <div class="doc-row-actions">
+              <input type="file" id="file-bank" hidden accept=".pdf,.jpg,.jpeg,.png"
+                     onchange="addFile(this,'list-bank','bank_details')" />
+              <button class="view-btn" id="upload-btn-bank" onclick="document.getElementById('file-bank').click()">Upload</button>
+            </div>
+          </div>
+          <div class="doc-file-list" id="list-bank"></div>
+        </div>
+
+        <button class="submit-btn" id="docs-submit-btn" onclick="submitDocs()" style="display:none;">
+          <span>📤</span> Submit Documents
+        </button>
+      </div>
+
+      <!-- IT SETUP -->
+      <div id="page-it" class="page">
+        <div class="section-eyebrow">Step 2 of 4</div>
+        <h2 class="section-heading">IT Provisioning</h2>
+        <p class="section-sub">Tell IT what you need. Your setup will be ready before day one.</p>
+
+        <div class="success-banner" id="it-success">
+          <span>✅</span> IT request submitted. Your setup will be ready on your start date.
+        </div>
+        <div class="api-error-banner" id="it-error"></div>
+
+        <div style="margin-bottom:28px;">
+          <div style="font-size:15px;font-weight:600;margin-bottom:14px;">Device Preference</div>
+          <div class="it-grid">
+            <div class="it-item" id="it-mac" onclick="selectDevice('mac')">
+              <div class="it-checkbox" id="it-mac-check">
+                <svg class="it-check-svg" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="it-info">
+                <div class="it-title">MacBook Pro / Air</div>
+                <div class="it-desc">macOS — preferred for design, dev, creative roles</div>
+              </div>
+            </div>
+            <div class="it-item" id="it-win" onclick="selectDevice('win')">
+              <div class="it-checkbox" id="it-win-check">
+                <svg class="it-check-svg" width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="it-info">
+                <div class="it-title">Windows Laptop</div>
+                <div class="it-desc">Windows 11 — standard corporate configuration</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div style="margin-bottom:28px;">
+          <div style="font-size:15px;font-weight:600;margin-bottom:14px;">Provisioning Checklist</div>
+          <div class="it-grid" id="it-checklist"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-grid" style="margin-bottom:28px;">
+          <div class="form-field full">
+            <label>Additional Software / Tools Needed</label>
+            <textarea id="it-software" placeholder="e.g. Figma Pro, Adobe CC, PyCharm, Docker Desktop…"></textarea>
+          </div>
+          <div class="form-field full">
+            <label>Remote Access Required?</label>
+            <select id="it-remote">
+              <option value="">Select</option>
+              <option>Yes — VPN access needed</option>
+              <option>No — office-only</option>
+              <option>Hybrid — both</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label>Any Accessibility Requirements?</label>
+            <textarea id="it-a11y" placeholder="e.g. External monitor, ergonomic keyboard, screen reader…" style="min-height:70px;"></textarea>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="it-submit-btn" onclick="submitIT()">
+          <span>💾</span> Submit IT Request
+        </button>
+      </div>
+
+      <!-- POLICY -->
+      <div id="page-policy" class="page">
+        <div class="section-eyebrow">Step 3 of 4</div>
+        <h2 class="section-heading">Policy Sign-off</h2>
+        <p class="section-sub">Read and acknowledge each policy. Your digital signature is legally binding.</p>
+
+        <div class="success-banner" id="policy-success">
+          <span>✅</span> All policies signed. You're all set legally!
+        </div>
+        <div class="api-error-banner" id="policy-error"></div>
+        <div class="policy-list" id="policy-list"></div>
+
+        <div style="margin-top:28px;">
+          <button class="submit-btn" id="policy-submit-btn" onclick="submitPolicies()">
+            <span>✍️</span> Confirm All Sign-offs
+          </button>
+        </div>
+      </div>
+
+      <!-- MEETING -->
+      <div id="page-meeting" class="page">
+        <div class="section-eyebrow">Step 4 of 4</div>
+        <h2 class="section-heading">Manager Intro</h2>
+        <p class="section-sub">Schedule a 30-minute introductory call with your reporting manager.</p>
+
+        <div class="success-banner" id="meeting-success">
+          <span>✅</span> Meeting booked! A calendar invite has been sent to your email.
+        </div>
+        <div class="api-error-banner" id="meeting-error"></div>
+
+        <div class="manager-card">
+          <div class="manager-avatar" id="mgr-avatar"></div>
+          <div>
+            <div class="manager-name" id="mgr-name">—</div>
+            <div class="manager-role" id="mgr-role">Your Reporting Manager</div>
+          </div>
+        </div>
+
+        <div style="font-size:15px;font-weight:600;margin-bottom:12px;">Available Slots — Next 5 Days</div>
+        <div class="time-slots" id="time-slots"></div>
+
+        <div class="form-grid" style="margin-bottom:28px;">
+          <div class="form-field full">
+            <label>Preferred Medium</label>
+            <select id="meet-medium">
+              <option value="">Select</option>
+              <option>Google Meet</option>
+              <option>Zoom</option>
+              <option>Microsoft Teams</option>
+              <option>In Person (Office)</option>
+            </select>
+          </div>
+          <div class="form-field full">
+            <label>Anything you'd like to discuss?</label>
+            <textarea id="meet-notes" placeholder="e.g. Role expectations, team structure, first-week plan…" style="min-height:80px;"></textarea>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="meeting-submit-btn" onclick="submitMeeting()">
+          <span>📅</span> Confirm Meeting
+        </button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div id="toast"><span id="toast-icon"></span><span id="toast-msg"></span></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════ */
+const CONFIG = {
+  COGNITO_USER_POOL_ID : 'ap-south-1_bgSsPnuls',
+  COGNITO_CLIENT_ID    : '4m6offqipu920acued5j19pj38',
+  API_BASE             : 'https://sw29d0wzj0.execute-api.ap-south-1.amazonaws.com/prod',
+};
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+const state = {
+  user             : null,
+  idToken          : null,
+  email            : '',
+  employeeId       : '',
+  completedSteps   : { docs:false, it:false, policy:false, meeting:false },
+  selectedDevice   : null,
+  signedPolicies   : new Set(),
+  selectedSlot     : null,
+  pendingFiles     : { nda:[], offer_letter:[], id_proof:[], education:[], bank_details:[] },
+  savedDocs        : [],   // [{ doc_type, link, status }]
+  _pendingUserAttrs: null,
+  // stored for retry: the payload sent to /resume-onboarding
+  _lastDocsCompletePayload: null,
+};
+
+const STEPS = ['docs','it','policy','meeting'];
+
+/* All required doc types */
+const ALL_DOC_TYPES = ['nda', 'offer_letter', 'id_proof', 'education', 'bank_details'];
+
+const DOC_TYPE_LABELS = {
+  nda         : 'NDA',
+  offer_letter: 'Offer Letter',
+  id_proof    : 'ID Proof',
+  education   : 'Educational Certificate',
+  bank_details: 'Bank Details Form',
+};
+
+const STEP_FIELD_MAP = {
+  docs   : 'docs_submitted',
+  it     : 'it_submitted',
+  policy : 'policies_signed',
+  meeting: 'meeting_booked',
+};
+
+/* doc_type → hidden file input id */
+const DOC_INPUT_MAP = {
+  nda         : 'file-nda',
+  offer_letter: 'file-offer',
+  id_proof    : 'file-id',
+  education   : 'file-edu',
+  bank_details: 'file-bank',
+};
+
+/* doc_type → file list container id */
+const DOC_LIST_MAP = {
+  nda         : 'list-nda',
+  offer_letter: 'list-offer',
+  id_proof    : 'list-id',
+  education   : 'list-edu',
+  bank_details: 'list-bank',
+};
+
+/* doc_type → Upload button id */
+const DOC_UPLOAD_BTN_MAP = {
+  nda         : 'upload-btn-nda',
+  offer_letter: 'upload-btn-offer',
+  id_proof    : 'upload-btn-id',
+  education   : 'upload-btn-edu',
+  bank_details: 'upload-btn-bank',
+};
+
+/* ═══════════════════════════════════════════════════════
+   COGNITO
+═══════════════════════════════════════════════════════ */
+function getPool() {
+  return new AmazonCognitoIdentity.CognitoUserPool({
+    UserPoolId: CONFIG.COGNITO_USER_POOL_ID,
+    ClientId  : CONFIG.COGNITO_CLIENT_ID,
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+function togglePw(inputId, btn) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  const isText = el.type === 'text';
+  el.type = isText ? 'password' : 'text';
+  btn.textContent = isText ? '👁' : '🙈';
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* Human-readable label for a doc_type key */
+function docTypeLabel(docType) {
+  return DOC_TYPE_LABELS[docType] || docType;
+}
+
+/* Map DynamoDB status value → badge text */
+function formatDocStatus(status) {
+  if (!status) return '✓ Uploaded';
+  const map = {
+    UPLOADED : '✓ Uploaded',
+    PENDING  : '⏳ Under Review',
+    APPROVED : '✅ Approved',
+    REJECTED : '❌ Rejected',
+    REUPLOAD : '🔁 Re-upload Needed',
+  };
+  return map[status.toUpperCase()] || status;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PASSWORD STRENGTH
+═══════════════════════════════════════════════════════ */
+const PW_RULES = [
+  { id:'req-len',     test: v => v.length >= 8          },
+  { id:'req-upper',   test: v => /[A-Z]/.test(v)        },
+  { id:'req-lower',   test: v => /[a-z]/.test(v)        },
+  { id:'req-num',     test: v => /[0-9]/.test(v)        },
+  { id:'req-special', test: v => /[^A-Za-z0-9]/.test(v) },
+];
+const STRENGTH_LABELS = ['','Weak','Fair','Good','Strong','Very strong'];
+const STRENGTH_COLORS = ['','#c0392b','#b5600d','#c0a010','#1a6b5a','#1a6b5a'];
+
+function evalPassword(val) {
+  const met = PW_RULES.map(r => r.test(val));
+  met.forEach((ok, i) => document.getElementById(PW_RULES[i].id)?.classList.toggle('met', ok));
+  const score = met.filter(Boolean).length;
+  const fill  = document.getElementById('pw-strength-fill');
+  const label = document.getElementById('pw-strength-label');
+  if (fill)  { fill.style.width = (score * 20) + '%'; fill.style.background = STRENGTH_COLORS[score]; }
+  if (label) { label.textContent = val ? STRENGTH_LABELS[score] : 'Enter a password'; label.style.color = STRENGTH_COLORS[score] || 'var(--muted)'; }
+}
+
+function checkConfirm() {
+  const pw   = document.getElementById('newpw-input')?.value || '';
+  const conf = document.getElementById('newpw-confirm')?.value || '';
+  const err  = document.getElementById('newpw-error');
+  if (err) err.textContent = (conf && pw !== conf) ? 'Passwords do not match.' : '';
+}
+
+function passwordMeetsPolicy(val) {
+  return PW_RULES.every(r => r.test(val));
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN TRANSITIONS
+═══════════════════════════════════════════════════════ */
+function showLoginScreen() {
+  document.getElementById('newpw-screen').style.display = 'none';
+  const ls = document.getElementById('login-screen');
+  ls.style.display = 'flex';
+  const card = ls.querySelector('.auth-card');
+  card.classList.remove('anim-in'); void card.offsetWidth; card.classList.add('anim-in');
+}
+
+function showNewPasswordScreen(email) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('newpw-email-label').textContent = email;
+  const ns = document.getElementById('newpw-screen');
+  ns.style.display = 'flex';
+  const card = ns.querySelector('.auth-card');
+  card.classList.remove('anim-in'); void card.offsetWidth; card.classList.add('anim-in');
+  document.getElementById('newpw-input').focus();
+}
+
+function backToLogin() {
+  state.user = null;
+  state._pendingUserAttrs = null;
+  document.getElementById('newpw-input').value = '';
+  document.getElementById('newpw-confirm').value = '';
+  document.getElementById('newpw-error').textContent = '';
+  evalPassword('');
+  showLoginScreen();
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTH — LOGIN
+═══════════════════════════════════════════════════════ */
+async function handleLogin() {
+  const email = document.getElementById('email-input').value.trim();
+  const pw    = document.getElementById('pw-input').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  err.textContent = '';
+  if (!email || !pw) { err.textContent = 'Please enter your email and password.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  const pool        = getPool();
+  const cognitoUser = new AmazonCognitoIdentity.CognitoUser({ Username: email, Pool: pool });
+  const authDetails = new AmazonCognitoIdentity.AuthenticationDetails({ Username: email, Password: pw });
+
+  cognitoUser.authenticateUser(authDetails, {
+    onSuccess(session) {
+      state.user       = cognitoUser;
+      state.idToken    = session.getIdToken().getJwtToken();
+      state.email      = email;
+      state.employeeId = session.getIdToken().payload['custom:employee_id'] || email;
+      btn.disabled     = false; btn.textContent = 'Sign In →';
+      enterApp(session.getIdToken().payload);
+    },
+    newPasswordRequired(userAttributes) {
+      state.user = cognitoUser;
+      delete userAttributes.email_verified;
+      delete userAttributes.email;
+      state._pendingUserAttrs = userAttributes;
+      btn.disabled = false; btn.textContent = 'Sign In →';
+      showNewPasswordScreen(email);
+    },
+    onFailure(e) {
+      err.textContent = friendlyAuthError(e);
+      btn.disabled    = false; btn.textContent = 'Sign In →';
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTH — SET NEW PASSWORD
+═══════════════════════════════════════════════════════ */
+function handleSetPassword() {
+  const newPw   = document.getElementById('newpw-input').value;
+  const confirm = document.getElementById('newpw-confirm').value;
+  const btn     = document.getElementById('newpw-btn');
+  const err     = document.getElementById('newpw-error');
+  err.textContent = '';
+
+  if (!newPw)                      { err.textContent = 'Please enter a new password.'; return; }
+  if (!passwordMeetsPolicy(newPw)) { err.textContent = 'Password does not meet all requirements.'; return; }
+  if (newPw !== confirm)           { err.textContent = 'Passwords do not match.'; return; }
+  if (!state.user)                 { err.textContent = 'Session expired. Please sign in again.'; backToLogin(); return; }
+
+  btn.disabled = true; btn.textContent = 'Setting password…';
+
+  state.user.completeNewPasswordChallenge(newPw, state._pendingUserAttrs || {}, {
+    onSuccess(session) {
+      state.idToken    = session.getIdToken().getJwtToken();
+      state.email      = session.getIdToken().payload.email || document.getElementById('newpw-email-label').textContent;
+      state.employeeId = session.getIdToken().payload['custom:employee_id'] || state.email;
+      btn.disabled     = false; btn.textContent = 'Set Password & Continue →';
+      document.getElementById('newpw-screen').style.display = 'none';
+      enterApp(session.getIdToken().payload);
+    },
+    onFailure(e) {
+      err.textContent = friendlyAuthError(e);
+      btn.disabled    = false; btn.textContent = 'Set Password & Continue →';
+    },
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('pw-input')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+  document.getElementById('newpw-confirm')?.addEventListener('keydown', e => { if (e.key === 'Enter') handleSetPassword(); });
+});
+
+function friendlyAuthError(e) {
+  switch (e.code || e.name) {
+    case 'NotAuthorizedException':         return 'Incorrect email or password.';
+    case 'UserNotFoundException':          return 'No account found with this email.';
+    case 'UserNotConfirmedException':      return 'Account not yet confirmed. Contact HR.';
+    case 'PasswordResetRequiredException': return 'Password reset required. Contact HR.';
+    case 'InvalidPasswordException':       return e.message || 'Password does not meet requirements.';
+    case 'LimitExceededException':         return 'Too many attempts. Please wait a few minutes and try again.';
+    default: return e.message || 'Something went wrong. Please try again.';
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUTH — LOGOUT
+═══════════════════════════════════════════════════════ */
+function handleLogout() {
+  if (state.user) state.user.signOut();
+  Object.assign(state, {
+    user:null, idToken:null, email:'', employeeId:'',
+    completedSteps:{docs:false,it:false,policy:false,meeting:false},
+    selectedDevice:null, signedPolicies:new Set(), selectedSlot:null,
+    pendingFiles:{nda:[],offer_letter:[],id_proof:[],education:[],bank_details:[]},
+    savedDocs:[],
+    _pendingUserAttrs:null,
+    _lastDocsCompletePayload:null,
+  });
+  document.getElementById('app').style.display        = 'none';
+  document.getElementById('email-input').value        = '';
+  document.getElementById('pw-input').value           = '';
+  document.getElementById('login-error').textContent  = '';
+  showLoginScreen();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ENTER APP
+═══════════════════════════════════════════════════════ */
+async function enterApp(payload) {
+  document.getElementById('login-screen').style.display  = 'none';
+  document.getElementById('newpw-screen').style.display  = 'none';
+  document.getElementById('app').style.display           = 'block';
+
+  const name = payload['custom:full_name'] || payload.name || payload.email?.split('@')[0] || 'New Hire';
+  document.getElementById('topbar-name').textContent = `👋 ${name}`;
+
+  const mgr = payload['custom:manager_name'] || 'Your Manager';
+  document.getElementById('mgr-name').textContent   = mgr;
+  document.getElementById('mgr-avatar').textContent = mgr.charAt(0).toUpperCase();
+  document.getElementById('mgr-role').textContent   = payload['custom:manager_role'] || 'Reporting Manager';
+
+  buildPolicies();
+  buildITChecklist();
+
+  await Promise.all([
+    loadProgress(),
+    loadDocuments(),
+    buildTimeSlots(),
+  ]);
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+function showPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRESS
+═══════════════════════════════════════════════════════ */
+function updateProgress() {
+  const done = STEPS.filter(s => state.completedSteps[s]).length;
+  const pct  = Math.round((done / STEPS.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = `${done} of ${STEPS.length} steps complete`;
+
+  STEPS.forEach(s => {
+    const badge      = document.getElementById('badge-' + s);
+    const card       = document.getElementById('card-' + s);
+    const cardStatus = document.getElementById('card-' + s + '-status');
+    if (state.completedSteps[s]) {
+      badge.textContent = '✓ Done'; badge.className = 'nav-badge done';
+      card?.classList.add('completed');
+      if (cardStatus) { cardStatus.className = 'step-card-status done'; cardStatus.textContent = '✓ Complete'; }
+    } else {
+      badge.textContent = 'Pending'; badge.className = 'nav-badge';
+      card?.classList.remove('completed');
+      if (cardStatus) { cardStatus.className = 'step-card-status pending'; cardStatus.textContent = '⬤ Pending'; }
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   API HELPERS
+   ─ FIXED: surfaces json.error (backend failure key) before
+     falling back to json.message so error strings like
+     "employee_id is required" and "No uploaded_files provided"
+     are shown correctly to the user instead of raw HTTP codes.
+═══════════════════════════════════════════════════════ */
+async function apiPost(path, body) {
+  const res = await fetch(CONFIG.API_BASE + path, {
+    method : 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(state.idToken ? { Authorization: 'Bearer ' + state.idToken } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch { json = { message: text }; }
+
+  // Backend uses { error: "..." } for all failure cases (400 + 500)
+  // and { message: "...", result: {...} } for successes.
+  if (!res.ok) {
+    throw new Error(json.error || json.message || `HTTP ${res.status}`);
+  }
+
+  return json;
+}
+
+async function apiGet(path) {
+  const res = await fetch(CONFIG.API_BASE + path, {
+    headers: state.idToken ? { Authorization: 'Bearer ' + state.idToken } : {},
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+/* ═══════════════════════════════════════════════════════
+   PROGRESS PERSISTENCE
+═══════════════════════════════════════════════════════ */
+async function loadProgress() {
+  try {
+    const data = await apiGet(`/onboarding/progress?email=${encodeURIComponent(state.email)}`);
+    state.completedSteps = {
+      docs   : !!data.docs_submitted,
+      it     : !!data.it_submitted,
+      policy : !!data.policies_signed,
+      meeting: !!data.meeting_booked,
+    };
+  } catch {
+    console.warn('Could not load progress from API');
+  }
+  updateProgress();
+}
+
+async function saveProgress(step) {
+  try {
+    await apiPost('/onboarding/progress', {
+      employee_id: state.employeeId,
+      step       : STEP_FIELD_MAP[step],
+    });
+  } catch (err) {
+    console.warn('Progress save failed:', err.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ERROR / TOAST HELPERS
+═══════════════════════════════════════════════════════ */
+function showError(bannerId, msg) {
+  const el = document.getElementById(bannerId);
+  if (!el) return;
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 6000);
+}
+function clearError(bannerId) {
+  const el = document.getElementById(bannerId);
+  if (el) el.classList.remove('show');
+}
+
+let toastTimer;
+function showToast(msg, icon = '✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FILE UPLOAD — CONSTANTS & STATUS MACHINE
+═══════════════════════════════════════════════════════ */
+const ALLOWED_TYPES      = ['application/pdf','image/jpeg','image/png','image/webp'];
+const MAX_SIZE_MB         = 5;
+const UPLOAD_CONCURRENCY  = 3;
+
+const FS = { READY:'READY', GETTING_URL:'GETTING_URL', UPLOADING:'UPLOADING', DONE:'DONE', FAILED:'FAILED' };
+
+const STATUS_UI = {
+  READY       : { label:'Ready',        cls:''          },
+  GETTING_URL : { label:'Getting URL…', cls:'uploading' },
+  UPLOADING   : { label:'Uploading…',   cls:'uploading' },
+  DONE        : { label:'✓ Done',       cls:'done'      },
+  FAILED      : { label:'Failed',       cls:'error'     },
+};
+
+function validateFile(file) {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    showToast(`${file.name}: unsupported type. Use PDF, JPG, or PNG.`, '⚠️'); return false;
+  }
+  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    showToast(`${file.name}: exceeds ${MAX_SIZE_MB} MB limit.`, '⚠️'); return false;
+  }
+  return true;
+}
+
+function setFileStatus(fileObj, status) {
+  fileObj.status = status;
+  const ui = STATUS_UI[status] || STATUS_UI.READY;
+  const el = document.getElementById('st-' + fileObj.id);
+  if (!el) return;
+  el.textContent = ui.label;
+  el.className   = 'file-item-status' + (ui.cls ? ' ' + ui.cls : '');
+}
+
+/* ─── Add file to pending list ─────────────────────── */
+function addFile(input, listId, documentType) {
+  const list = document.getElementById(listId);
+  Array.from(input.files).forEach(file => {
+    if (!validateFile(file)) return;
+
+    const fileObj = {
+      id     : `fi-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      docType: documentType,
+      status : FS.READY,
+      s3_key : null,
+    };
+
+    state.pendingFiles[documentType] = state.pendingFiles[documentType] || [];
+    state.pendingFiles[documentType].push(fileObj);
+
+    const el = document.createElement('div');
+    el.className = 'file-item';
+    el.id        = fileObj.id;
+    el.innerHTML = `
+      <span>📄</span>
+      <span class="file-item-name">${escHtml(file.name)}</span>
+      <span class="file-item-size">${(file.size/1024/1024).toFixed(2)} MB</span>
+      <span class="file-item-status" id="st-${fileObj.id}">Ready</span>
+      <button class="file-item-remove" title="Remove"
+        onclick="removePendingFile('${fileObj.id}','${documentType}')">✕</button>
+    `;
+    list.appendChild(el);
+
+    // Dismiss validation banner when user adds a file
+    dismissValidationBanner();
+    syncSubmitButtonVisibility();
+  });
+  input.value = '';
+}
+
+function removePendingFile(fileObjId, documentType) {
+  document.getElementById(fileObjId)?.remove();
+  state.pendingFiles[documentType] = (state.pendingFiles[documentType] || [])
+    .filter(fo => fo.id !== fileObjId);
+  syncSubmitButtonVisibility();
+}
+
+/* ─── Upload single file via presigned URL ─────────── */
+async function uploadFile(fileObj) {
+  try {
+    setFileStatus(fileObj, FS.GETTING_URL);
+
+    const { uploadUrl, key } = await apiPost('/get-upload-url', {
+      employee_id  : state.employeeId,
+      file_name    : fileObj.file.name,
+      content_type : fileObj.file.type || 'application/pdf',
+      document_type: fileObj.docType,
+    });
+
+    setFileStatus(fileObj, FS.UPLOADING);
+
+    const uploadRes = await fetch(uploadUrl, {
+      method : 'PUT',
+      headers: { 'Content-Type': fileObj.file.type || 'application/pdf' },
+      body   : fileObj.file,
+    });
+
+    if (!uploadRes.ok) throw new Error(`S3 upload failed — HTTP ${uploadRes.status}`);
+
+    fileObj.s3_key = key;
+    setFileStatus(fileObj, FS.DONE);
+  } catch (err) {
+    console.error('UPLOAD ERROR:', err);
+    setFileStatus(fileObj, FS.FAILED);
+    throw err;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   DOCUMENT VALIDATION — check all types covered
+   A doc type is "covered" if:
+     • it has at least one pending file (newly added), OR
+     • it was previously saved (already in state.savedDocs)
+═══════════════════════════════════════════════════════ */
+function getMissingDocTypes() {
+  const savedTypes  = new Set(state.savedDocs.map(d => d.doc_type));
+  const pendingTypes = new Set(
+    Object.entries(state.pendingFiles)
+      .filter(([, files]) => files.length > 0)
+      .map(([docType]) => docType)
+  );
+  return ALL_DOC_TYPES.filter(dt => !savedTypes.has(dt) && !pendingTypes.has(dt));
+}
+
+function showValidationBanner(missingTypes) {
+  const banner  = document.getElementById('docs-validation-banner');
+  const list    = document.getElementById('docs-missing-list');
+  list.innerHTML = missingTypes.map(dt =>
+    `<li>${docTypeLabel(dt)}</li>`
+  ).join('');
+  banner.classList.add('show');
+  banner.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function dismissValidationBanner() {
+  document.getElementById('docs-validation-banner')?.classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESUME-ONBOARDING — fire-and-forget with retry UI
+═══════════════════════════════════════════════════════ */
+async function callResumeOnboarding(payload) {
+  try {
+    await apiPost('/resume-onboarding', payload);
+    document.getElementById('resume-retry-banner')?.classList.remove('show');
+  } catch (err) {
+    console.warn('resume-onboarding failed (non-fatal):', err.message);
+    state._lastDocsCompletePayload = payload;
+    document.getElementById('resume-retry-banner')?.classList.add('show');
+  }
+}
+
+async function retryResumeOnboarding() {
+  const payload = state._lastDocsCompletePayload;
+  if (!payload) return;
+
+  const btn = document.getElementById('resume-retry-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Syncing…'; }
+
+  try {
+    await apiPost('/resume-onboarding', payload);
+    state._lastDocsCompletePayload = null;
+    document.getElementById('resume-retry-banner')?.classList.remove('show');
+    showToast('Workflow sync successful!');
+  } catch (err) {
+    console.warn('resume-onboarding retry failed:', err.message);
+    showToast('Sync still failing — HR will pick this up automatically.', '⚠️');
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '↩ Retry Sync'; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFIRM UPLOAD
+   ─ FIXED: sends a flat { employee_id, uploaded_files }
+     body directly — no token_type / status / output wrapper.
+     The backend reads uploaded_files at the top level, not
+     nested inside an "output" object.
+   ─ Handles { result: { action: "CREATED" | "UPDATED" } }
+     success shape.
+   ─ "Token already consumed" guard preserved for idempotency.
+═══════════════════════════════════════════════════════ */
+async function confirmUpload(fileObjs) {
+  const uploaded_files = fileObjs
+    .filter(fo => fo.status === FS.DONE && fo.s3_key)
+    .map(fo => ({ doc_type: fo.docType, key: fo.s3_key }));
+
+  if (uploaded_files.length === 0) {
+    throw new Error('No files were uploaded successfully.');
+  }
+
+  // Flat payload — exactly what /docs-upload-complete expects
+  const payload = {
+    employee_id   : state.employeeId,
+    uploaded_files,
+  };
+
+  const res = await apiPost('/docs-upload-complete', payload);
+
+  // Log the action for diagnostics but don't block on it
+  const action = res?.result?.action;
+  if (action) console.info(`docs-upload-complete: ${action}`);
+
+  // Guard: backend already processed this (idempotency token consumed)
+  if (res?.message === 'Token already consumed') {
+    await loadProgress();
+    return;
+  }
+
+  // Fire-and-forget workflow notification (non-blocking, shows retry banner on failure)
+  callResumeOnboarding(payload);
+
+  markStepComplete('docs');
+}
+
+function markStepComplete(step) {
+  state.completedSteps[step] = true;
+  updateProgress();
+}
+
+/* ─── Concurrency-limited parallel uploader ────────── */
+async function uploadWithConcurrencyLimit(fileObjs, limit) {
+  const queue   = [...fileObjs];
+  const results = [];
+
+  async function worker() {
+    while (queue.length > 0) {
+      const fo = queue.shift();
+      try        { await uploadFile(fo); results.push({ fo, ok: true });  }
+      catch(err) {                        results.push({ fo, ok: false, err }); }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(limit, fileObjs.length) }, worker));
+  return results;
+}
+
+/* ─── Submit all pending docs ───────────────────────── */
+async function submitDocs() {
+  clearError('docs-error');
+  dismissValidationBanner();
+
+  // ── FRONTEND VALIDATION: all doc types must be covered ──
+  const missing = getMissingDocTypes();
+  if (missing.length > 0) {
+    showValidationBanner(missing);
+    return;
+  }
+
+  const allPending = Object.values(state.pendingFiles).flat();
+  const toUpload   = allPending.filter(fo => fo.status === FS.READY || fo.status === FS.FAILED);
+
+  if (toUpload.length === 0) {
+    showToast('All documents already uploaded. Nothing new to submit.', 'ℹ️');
+    return;
+  }
+
+  const btn = document.getElementById('docs-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> Uploading…';
+
+  try {
+    const results = await uploadWithConcurrencyLimit(toUpload, UPLOAD_CONCURRENCY);
+    const failed  = results.filter(r => !r.ok);
+    const success = results.filter(r => r.ok);
+
+    if (success.length === 0) {
+      throw new Error(failed[0]?.err?.message || 'All uploads failed. Please try again.');
+    }
+    if (failed.length > 0) {
+      showError('docs-error', `${failed.length} file(s) failed. Fix them and re-submit. Successfully uploaded files have been saved.`);
+    }
+
+    btn.innerHTML = '<span>⏳</span> Confirming…';
+    await confirmUpload(toUpload);
+
+    document.getElementById('docs-success').style.display = 'flex';
+    await saveProgress('docs');
+    await loadDocuments();
+    showToast('Documents submitted successfully!');
+
+  } catch (err) {
+    console.error('SUBMIT DOCS ERROR:', err);
+    showError('docs-error', err.message || 'Submission failed. Please try again.');
+    showToast('Upload failed — see error above.', '❌');
+  }
+
+  btn.disabled = false; btn.innerHTML = '<span>📤</span> Submit Documents';
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOAD DOCUMENTS
+   ─ Uses data-link attribute + delegated click listeners
+     instead of embedding URLs in onclick="..." strings,
+     which breaks on presigned S3 URLs containing & and =.
+   ─ Also populates the home-dashboard document links panel.
+═══════════════════════════════════════════════════════ */
+async function loadDocuments() {
+
+  // ── Reset upload-section UI ──────────────────────────
+  Object.values(DOC_LIST_MAP).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '';
+  });
+  Object.values(DOC_UPLOAD_BTN_MAP).forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.style.display = '';
+  });
+
+  state.pendingFiles = { nda:[], offer_letter:[], id_proof:[], education:[], bank_details:[] };
+  state.savedDocs    = [];
+
+  try {
+    const res       = await apiGet(`/documents/${state.employeeId || state.email}`);
+    const documents = res.documents || {};
+
+    Object.entries(documents).forEach(([docType, { link, status }]) => {
+      if (!link) return;
+
+      const listId = DOC_LIST_MAP[docType];
+      if (!listId) return;
+
+      const list = document.getElementById(listId);
+      if (!list) return;
+
+      state.savedDocs.push({ doc_type: docType, link, status });
+
+      const safeDocType = escHtml(docType);
+      const statusLabel = formatDocStatus(status);
+
+      // ── File-item row in the Documents step ──────────
+      // Link stored in data-link — never injected into onclick
+      const el = document.createElement('div');
+      el.className       = 'file-item is-saved';
+      el.dataset.docType = docType;
+      el.dataset.link    = link;   // ← raw URL stored here safely
+      el.innerHTML = `
+        <span>📄</span>
+        <span class="file-item-name">${docTypeLabel(docType)}</span>
+        <button class="view-btn doc-view-btn" title="Open document">View ↗</button>
+        <button
+          class="replace-btn"
+          id="replace-btn-${safeDocType}"
+          data-doctype="${safeDocType}"
+          title="Upload a new version">
+          Replace
+        </button>
+        <span class="file-item-status done">${statusLabel}</span>
+      `;
+
+      // Attach listeners directly — no inline onclick with URL
+      el.querySelector('.doc-view-btn').addEventListener('click', () => openDocLink(link));
+      el.querySelector('.replace-btn').addEventListener('click', function() {
+        replaceFile(this.dataset.doctype, this);
+      });
+
+      list.appendChild(el);
+
+      const uploadBtn = document.getElementById(DOC_UPLOAD_BTN_MAP[docType]);
+      if (uploadBtn) uploadBtn.style.display = 'none';
+    });
+
+  } catch (err) {
+    console.warn('loadDocuments: could not fetch documents:', err.message);
+  }
+
+  syncSubmitButtonVisibility();
+  renderDocLinksPanel();   // ← refresh home dashboard
+}
+
+/* ─── Safe document opener ──────────────────────────── */
+function openDocLink(link) {
+  if (!link) { showToast('No link available for this document.', '⚠️'); return; }
+  window.open(link, '_blank', 'noopener,noreferrer');
+}
+
+/* ─── Legacy alias (kept for any external callers) ──── */
+function viewSavedDoc(link) { openDocLink(link); }
+
+/* ═══════════════════════════════════════════════════════
+   HOME DASHBOARD — DOCUMENT LINKS PANEL
+   Renders one card per saved doc with name, status badge,
+   and a direct "Open" link. Safe: URLs go into href / data
+   attributes set by JS, never injected into HTML strings.
+═══════════════════════════════════════════════════════ */
+
+/* Status value → { label, cssClass } */
+const DOC_STATUS_BADGE = {
+  UPLOADED : { label: '✓ Uploaded',        cls: 'status-uploaded' },
+  PENDING  : { label: '⏳ Under Review',    cls: 'status-pending'  },
+  APPROVED : { label: '✅ Approved',        cls: 'status-approved' },
+  REJECTED : { label: '❌ Rejected',        cls: 'status-rejected' },
+  REUPLOAD : { label: '🔁 Re-upload Needed',cls: 'status-reupload' },
+};
+
+/* Icon per doc type */
+const DOC_ICONS = {
+  nda         : '📄',
+  offer_letter: '📄',
+  id_proof    : '🪪',
+  education   : '🎓',
+  bank_details: '🏦',
+};
+
+function renderDocLinksPanel() {
+  const panel    = document.getElementById('home-doc-links-panel');
+  const body     = document.getElementById('home-doc-links-body');
+  const subtitle = document.getElementById('home-doc-links-subtitle');
+  if (!panel || !body) return;
+
+  if (state.savedDocs.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = '';
+  subtitle.textContent = `${state.savedDocs.length} of ${ALL_DOC_TYPES.length} documents submitted`;
+
+  body.innerHTML = '';   // clear previous
+
+  state.savedDocs.forEach(({ doc_type, link, status }) => {
+    const badge     = DOC_STATUS_BADGE[(status || 'UPLOADED').toUpperCase()] || DOC_STATUS_BADGE.UPLOADED;
+    const icon      = DOC_ICONS[doc_type] || '📄';
+    const labelText = docTypeLabel(doc_type);
+
+    const row = document.createElement('div');
+    row.className = 'doc-link-row';
+    row.innerHTML = `
+      <div class="doc-link-icon">${icon}</div>
+      <div class="doc-link-info">
+        <div class="doc-link-name">${labelText}</div>
+        <div class="doc-link-meta">Click Open to view your submitted file</div>
+      </div>
+      <span class="doc-link-status ${badge.cls}">${badge.label}</span>
+      <a class="doc-link-open" target="_blank" rel="noopener noreferrer">
+        ↗ Open
+      </a>
+    `;
+
+    // Set href via JS — never interpolated into HTML string
+    row.querySelector('.doc-link-open').href = link;
+
+    body.appendChild(row);
+  });
+}
+
+/* ─── Replace file ──────────────────────────────────── */
+function replaceFile(docType, triggerBtn) {
+  const inputId = DOC_INPUT_MAP[docType];
+  const input   = document.getElementById(inputId);
+  if (!input) return;
+
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    input.value = '';
+    if (!file || !validateFile(file)) return;
+
+    if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = '⏳ Replacing…'; }
+
+    const fileObj = {
+      id     : `replace-${Date.now()}`,
+      file,
+      docType,
+      status : FS.READY,
+      s3_key : null,
+    };
+
+    try {
+      await uploadFile(fileObj);
+      await confirmUpload([fileObj]);
+      showToast('Document replaced successfully!');
+      await loadDocuments();
+    } catch (err) {
+      showToast(`Replace failed: ${err.message}`, '❌');
+      if (triggerBtn) { triggerBtn.disabled = false; triggerBtn.textContent = 'Replace'; }
+    }
+
+    input.onchange = ev => addFile(ev.target, DOC_LIST_MAP[docType], docType);
+  };
+
+  input.click();
+}
+
+/* ─── Show Submit only when pending files exist ─────── */
+function syncSubmitButtonVisibility() {
+  const hasPending = Object.values(state.pendingFiles).flat().length > 0;
+  const btn = document.getElementById('docs-submit-btn');
+  if (btn) btn.style.display = hasPending ? '' : 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   IT SETUP
+═══════════════════════════════════════════════════════ */
+const IT_ITEMS = [
+  { id:'email',  icon:'📧', title:'Corporate Email',  desc:'Microsoft 365 / Google Workspace account', auto:true  },
+  { id:'slack',  icon:'💬', title:'Slack Access',     desc:'Added to company workspace & channels',    auto:true  },
+  { id:'vpn',    icon:'🔒', title:'VPN Access',       desc:'WireGuard / Cisco AnyConnect credentials', auto:false },
+  { id:'laptop', icon:'💻', title:'Laptop Delivered', desc:'Device shipped or ready at desk',          auto:false },
+  { id:'jira',   icon:'🗂️', title:'Jira / PM Tool',   desc:'Project management access provisioned',    auto:true  },
+  { id:'github', icon:'🐙', title:'GitHub / GitLab',  desc:'Version control organization access',      auto:false },
+];
+
+function buildITChecklist() {
+  document.getElementById('it-checklist').innerHTML = IT_ITEMS.map(it => `
+    <div class="it-item${it.auto?' done-item':''}" id="itbox-${it.id}">
+      <div class="it-checkbox" id="itchk-${it.id}">
+        <svg class="it-check-svg" width="11" height="9" viewBox="0 0 11 9" fill="none">
+          <path d="M1 4L4 7.5L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="it-info">
+        <div class="it-title">${it.icon} ${it.title}</div>
+        <div class="it-desc">${it.desc}</div>
+        <span class="it-status-tag ${it.auto?'auto-tag':'pending-tag'}">${it.auto?'⚡ Auto-provisioned':'⏳ Pending IT'}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectDevice(type) {
+  state.selectedDevice = type;
+  ['mac','win'].forEach(d => document.getElementById('it-'+d).classList.toggle('done-item', d===type));
+}
+
+async function submitIT() {
+  clearError('it-error');
+  if (!state.selectedDevice) { showToast('Please select a device preference.', '⚠️'); return; }
+  const btn = document.getElementById('it-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> Submitting…';
+  try {
+    await apiPost('/onboarding/it', {
+      employee_id  : state.employeeId,
+      device       : state.selectedDevice,
+      software     : document.getElementById('it-software').value,
+      remote       : document.getElementById('it-remote').value,
+      accessibility: document.getElementById('it-a11y').value,
+    });
+    document.getElementById('it-success').style.display = 'flex';
+    state.completedSteps.it = true;
+    updateProgress();
+    await saveProgress('it');
+    showToast('IT request submitted!');
+  } catch (err) {
+    showError('it-error', err.message || 'Submission failed. Please try again.');
+    showToast('Submission failed — see error above.', '❌');
+  }
+  btn.disabled = false; btn.innerHTML = '<span>💾</span> Submit IT Request';
+}
+
+/* ═══════════════════════════════════════════════════════
+   POLICIES
+═══════════════════════════════════════════════════════ */
+const POLICIES = [
+  { id:'code',  icon:'📘', name:'Code of Conduct',           desc:'2 pages · Updated Jan 2025',         link:'https://d1i7s9im1domv9.cloudfront.net/code_of_conduct.html' },
+  { id:'data',  icon:'🔐', name:'Data Privacy & Security',   desc:'3 pages · GDPR & IT-ACT compliant',  link:'https://d1i7s9im1domv9.cloudfront.net/data_privacy_security.html' },
+  { id:'leave', icon:'🏖️', name:'Leave & Attendance Policy', desc:'4 pages · Includes WFH guidelines',  link:'https://d1i7s9im1domv9.cloudfront.net/leave_attendance_policy.html' },
+  { id:'anti',  icon:'🤝', name:'Anti-Harassment Policy',    desc:'2 pages · POSH compliant',           link:'https://d1i7s9im1domv9.cloudfront.net/anti_harassment_policy.html' },
+];
+
+function buildPolicies() {
+  document.getElementById('policy-list').innerHTML = POLICIES.map(p => `
+    <div class="policy-item" id="pitem-${p.id}">
+      <span class="policy-icon">${p.icon}</span>
+      <div class="policy-info">
+        <div class="policy-name">
+          <a class="policy-name-link" href="${p.link || '#'}" ${p.link ? 'target="_blank" rel="noopener noreferrer"' : ''}>${p.name}</a>
+        </div>
+        <div class="policy-meta">${p.desc}</div>
+      </div>
+      <button class="policy-action sign-btn" id="pbtn-${p.id}" onclick="signPolicy('${p.id}')">Sign</button>
+    </div>
+  `).join('');
+}
+
+function signPolicy(id) {
+  state.signedPolicies.add(id);
+  document.getElementById('pitem-'+id).classList.add('signed');
+  const btn = document.getElementById('pbtn-'+id);
+  btn.textContent = '✓ Signed'; btn.className = 'policy-action signed-badge';
+  showToast('Policy acknowledged.');
+}
+
+async function submitPolicies() {
+  clearError('policy-error');
+  if (state.signedPolicies.size < POLICIES.length) {
+    showToast(`Please sign all ${POLICIES.length} policies first.`, '⚠️'); return;
+  }
+  const btn = document.getElementById('policy-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> Confirming…';
+  try {
+    await apiPost('/policy/sign-confirm', {
+      employee_id: state.employeeId,
+      token_type : 'EMPLOYEE_POLICY_SIGN',
+      status     : 'SUCCESS',
+      output     : { signed_policies:[...state.signedPolicies], signed_at:new Date().toISOString() },
+    });
+    document.getElementById('policy-success').style.display = 'flex';
+    state.completedSteps.policy = true;
+    updateProgress();
+    await saveProgress('policy');
+    showToast('All policies confirmed!');
+  } catch (err) {
+    showError('policy-error', err.message || 'Submission failed. Please try again.');
+    showToast('Submission failed — see error above.', '❌');
+  }
+  btn.disabled = false; btn.innerHTML = '<span>✍️</span> Confirm All Sign-offs';
+}
+
+/* ═══════════════════════════════════════════════════════
+   TIME SLOTS
+═══════════════════════════════════════════════════════ */
+async function buildTimeSlots() {
+  let bookedSlots = new Set();
+  try {
+    const data = await apiGet('/onboarding/slots');
+    bookedSlots = new Set(data.bookedSlots || []);
+  } catch { /* show all slots until API is ready */ }
+
+  const slots     = generateSlots();
+  const container = document.getElementById('time-slots');
+  container.innerHTML = slots.map(s => {
+    const isBooked = bookedSlots.has(s.key);
+    const safeId   = s.key.replace(/\//g,'-').replace(/[\s:]/g,'_');
+    return `
+      <button class="slot-btn${isBooked?' booked':''}" id="slot-${safeId}"
+        ${isBooked ? 'disabled' : `onclick="selectSlot('${s.key}',this)"`}>
+        ${s.label.replace('\n','<br/>')}
+      </button>
+    `;
+  }).join('');
+}
+
+function generateSlots() {
+  const slots=[];
+  const dayNames=['Mon','Tue','Wed','Thu','Fri'];
+  const times=['10:00 AM','2:00 PM','4:30 PM'];
+  const today=new Date(); let weekdayCount=0;
+  for (let i=1; i<=14 && weekdayCount<5; i++) {
+    const d=new Date(today); d.setDate(today.getDate()+i);
+    const dow=d.getDay(); if (dow===0||dow===6) continue;
+    const label=`${dayNames[dow-1]} ${d.getDate()}/${d.getMonth()+1}`;
+    times.forEach(t => slots.push({ key:`${label}-${t}`, label:`${label}\n${t}` }));
+    weekdayCount++;
+  }
+  return slots;
+}
+
+function selectSlot(key, el) {
+  document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected'); state.selectedSlot = key;
+}
+
+async function submitMeeting() {
+  clearError('meeting-error');
+  if (!state.selectedSlot) { showToast('Please select a time slot.', '⚠️'); return; }
+  const med = document.getElementById('meet-medium').value;
+  if (!med) { showToast('Please choose a meeting medium.', '⚠️'); return; }
+  const btn = document.getElementById('meeting-submit-btn');
+  btn.disabled = true; btn.innerHTML = '<span>⏳</span> Booking…';
+  try {
+    await apiPost('/manager/intro-confirm', {
+      employee_id: state.employeeId,
+      token_type : 'MANAGER_INTRO_CONFIRM',
+      status     : 'SUCCESS',
+      output     : { slot:state.selectedSlot, medium:med, notes:document.getElementById('meet-notes').value },
+    });
+    document.getElementById('meeting-success').style.display = 'flex';
+    state.completedSteps.meeting = true;
+    updateProgress();
+    await saveProgress('meeting');
+    showToast('Meeting booked! Check your email.');
+  } catch (err) {
+    if (err.message?.toLowerCase().includes('slot') || err.message?.includes('409')) {
+      showError('meeting-error', 'This slot was just booked. Please pick another.');
+      await buildTimeSlots(); state.selectedSlot = null;
+    } else {
+      showError('meeting-error', err.message || 'Booking failed. Please try again.');
+    }
+    showToast('Booking failed — see error above.', '❌');
+  }
+  btn.disabled = false; btn.innerHTML = '<span>📅</span> Confirm Meeting';
+}
+</script>
+</body>
+</html>

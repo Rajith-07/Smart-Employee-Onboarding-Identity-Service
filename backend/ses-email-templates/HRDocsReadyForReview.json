@@ -1,0 +1,8 @@
+{
+  "Template": {
+    "TemplateName": "HRDocsReadyForReview",
+    "SubjectPart": "Onboarding Documents Ready: {{name}}",
+    "HtmlPart": "<div style=\"max-width: 600px; margin: 0 auto; font-family: Arial, Helvetica, sans-serif; background-color: #ffffff;\"><div style=\"background-color: #16a34a; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;\"><h1 style=\"margin: 0; font-size: 24px; font-weight: bold;\">Documents Ready for Review</h1></div><div style=\"padding: 30px; background-color: #ffffff; border: 1px solid #e5e7eb;\"><p style=\"font-size: 16px; color: #374151; margin-bottom: 20px;\">Dear HR Team,</p><p style=\"font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 20px;\">The onboarding documents for <strong>{{name}}</strong> have been completed and are now ready for your review and approval.</p><div style=\"background-color: #f0f9ff; border-left: 4px solid #16a34a; padding: 16px; margin: 20px 0;\"><p style=\"margin: 0; font-size: 16px; color: #374151;\"><strong>Next Steps:</strong> Please review the submitted documents and provide approval or feedback as needed.</p></div><p style=\"font-size: 16px; color: #374151; margin-bottom: 0;\">Thank you for your prompt attention to this matter.</p></div><div style=\"background-color: #f9fafb; padding: 16px; text-align: center; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb; border-top: none;\"><p style=\"margin: 0; font-size: 14px; color: #6b7280;\">HR Department | Document Review System</p></div></div>",
+    "TextPart": "The onboarding documents for {{name}} are ready for your review."
+  }
+}
