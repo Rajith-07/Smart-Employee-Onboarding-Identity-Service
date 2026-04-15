@@ -1889,10 +1889,10 @@ async function submitIT() {
    POLICIES
 ═══════════════════════════════════════════════════════ */
 const POLICIES = [
-  { id:'code',  icon:'📘', name:'Code of Conduct',           desc:'2 pages · Updated Jan 2025',         link:'https://d1i7s9im1domv9.cloudfront.net/code_of_conduct.html' },
-  { id:'data',  icon:'🔐', name:'Data Privacy & Security',   desc:'3 pages · GDPR & IT-ACT compliant',  link:'https://d1i7s9im1domv9.cloudfront.net/data_privacy_security.html' },
-  { id:'leave', icon:'🏖️', name:'Leave & Attendance Policy', desc:'4 pages · Includes WFH guidelines',  link:'https://d1i7s9im1domv9.cloudfront.net/leave_attendance_policy.html' },
-  { id:'anti',  icon:'🤝', name:'Anti-Harassment Policy',    desc:'2 pages · POSH compliant',           link:'https://d1i7s9im1domv9.cloudfront.net/anti_harassment_policy.html' },
+  { id:'code',  icon:'📘', name:'Code of Conduct',           desc:'2 pages · Updated Jan 2025',         link: process.env.CODE_OF_CONDUCT_URL },
+  { id:'data',  icon:'🔐', name:'Data Privacy & Security',   desc:'3 pages · GDPR & IT-ACT compliant',  link: process.env.DATA_PRIVACY_SECURITY_URL },
+  { id:'leave', icon:'🏖️', name:'Leave & Attendance Policy', desc:'4 pages · Includes WFH guidelines',  link: process.env.LEAVE_ATTENDANCE_POLICY_URL },
+  { id:'anti',  icon:'🤝', name:'Anti-Harassment Policy',    desc:'2 pages · POSH compliant',           link: process.env.ANTI_HARASSMENT_POLICY_URL },
 ];
 
 function buildPolicies() {
