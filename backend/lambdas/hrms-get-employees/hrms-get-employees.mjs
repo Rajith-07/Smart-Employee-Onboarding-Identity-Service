@@ -1,7 +1,10 @@
 import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 
-const ddb = new DynamoDBClient({ region: "ap-south-1" });
+const REGION = process.env.REGION;
 
+const ddb = new DynamoDBClient({ region: REGION });
+
+// Convert DynamoDB AttributeValue → plain JSON
 const unmarshall = (item) => {
   const obj = {};
   for (const key in item) {
@@ -34,13 +37,13 @@ export const handler = async () => {
 
     // Sort: newest first
     result.sort((a, b) =>
-      new Date(b.submitted_at || 0) - new Date(a.submitted_at || 0)
+      new Date(b.created_at || 0) - new Date(a.created_at || 0)
     );
 
     return {
       statusCode: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": process.env.CORS_ALLOW_ORIGIN
       },
       body: JSON.stringify(result)
     };

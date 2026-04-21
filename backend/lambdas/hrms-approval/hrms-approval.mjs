@@ -1,3 +1,4 @@
+
 import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { CognitoIdentityProviderClient, AdminCreateUserCommand } from "@aws-sdk/client-cognito-identity-provider";
 import { SESClient, SendTemplatedEmailCommand } from "@aws-sdk/client-ses";
@@ -50,12 +51,12 @@ export const handler = async (event) => {
     await ses.send(new SendTemplatedEmailCommand({
       Source: process.env.SES_SENDER_EMAIL,
       Destination: { ToAddresses: [email] },
-      Template: "OnboardingWelcome",
+      Template: process.env.EMAIL_TEMPLATE,
       TemplateData: JSON.stringify({
         name: employee.first_name?.S || "New Hire",
         email: email,
         temp_password: tempPassword,
-        portal_url: process.env.ONBOARDING_PORTAL_URL
+        portal_link: process.env.ONBOARDING_PORTAL_URL
       })
     }));
 
@@ -89,6 +90,6 @@ export const handler = async (event) => {
 
   } catch (err) {
     console.error("PROVISIONING_ERROR:", err);
-    throw err; // Let Lambda retry if it's a transient service error
+    throw err;
   }
 };
