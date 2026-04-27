@@ -10,9 +10,9 @@
 
 ## Table of Contents
 
-- [Overview](#-overview)
-- [Architecture](#-architecture)
-- [AWS Services Used](#-aws-services-used)
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [AWS Services Used](#aws-services-used)
 - [Features](#-features)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
@@ -23,6 +23,7 @@
 
 ---
 
+<a name="overview"></a>
 ## Overview
 
 **Base-Camp** streamlines the entire employee onboarding lifecycle using a fully serverless AWS architecture. HR teams can initiate onboarding, track progress in real-time, and manage identity provisioning — all through a clean web dashboard.
@@ -35,6 +36,7 @@ Key capabilities:
 
 ---
 
+<a name="architecture"></a>
 ## Architecture
 
 ```
@@ -64,6 +66,7 @@ The frontend HR dashboard communicates with the backend via API Gateway, which t
 
 ---
 
+<a name="aws-services-used"></a>
 ## AWS Services Used
 
 | Service | Purpose |
