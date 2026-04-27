@@ -13,13 +13,13 @@
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [AWS Services Used](#aws-services-used)
-- [Features](#-features)
-- [Project Structure](#-project-structure)
-- [Getting Started](#-getting-started)
-- [Frontend (HR Dashboard)](#-frontend-hr-dashboard)
-- [Backend (Lambda & Step Functions)](#-backend-lambda--step-functions)
-- [Environment Variables](#-environment-variables)
-- [License](#-license)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Frontend (HR Dashboard)](#frontend-hr-dashboard)
+- [Backend (Lambda & Step Functions)](#backend)
+- [Environment Variables](#environment-variables)
+- [License](#license)
 
 ---
 
@@ -81,6 +81,7 @@ The frontend HR dashboard communicates with the backend via API Gateway, which t
 
 ---
 
+<a name="features"></a>
 ## Features
 
 - **Automated Onboarding Workflows** — Step Functions orchestrate multi-stage onboarding (account creation → document collection → access provisioning → completion)
@@ -93,6 +94,7 @@ The frontend HR dashboard communicates with the backend via API Gateway, which t
 
 ---
 
+<a name="project-structure"></a>
 ## Project Structure
 
 ```
@@ -113,6 +115,7 @@ Base-Camp/
 
 ---
 
+<a name="getting-started"></a>
 ## Getting Started
 
 ### Prerequisites
@@ -174,6 +177,7 @@ open index.html
 
 ---
 
+<a name="frontend-hr-dashboard"></a>
 ## Frontend (HR Dashboard)
 
 The frontend is a lightweight HTML/JavaScript web application serving as the HR team's control panel.
@@ -188,6 +192,7 @@ The dashboard communicates with the backend via Amazon API Gateway REST APIs.
 
 ---
 
+<a name="backend"></a>
 ## Backend (Lambda & Step Functions)
 
 The backend consists of AWS Lambda functions triggered by API Gateway and orchestrated by Step Functions.
@@ -212,6 +217,7 @@ Each stage is an individual Lambda function, and the state machine manages trans
 
 ---
 
+<a name="environment-variables"></a>
 ## Environment Variables
 
 Create a `.env` file in the `backend/` directory with the following variables:
@@ -241,12 +247,7 @@ API_GATEWAY_ENDPOINT=https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com/prod
 
 ---
 
+<a name="license"></a>
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).
-
----
-
-<p align="center">
-  Built with ❤️ on AWS · <a href="https://github.com/Rajith-07/Base-Camp">View on GitHub</a>
-</p>
